@@ -1,0 +1,4 @@
+overrides:
+  '@albirex/platformatic-logto': 'link:'
+  fastify-logto: link:../../../Library/pnpm/global/5/node_modules/@albirex/fastify-logto
+  '@albirex/fastify-logto': link:../../../Library/pnpm/global/5/node_modules/@albirex/fastify-logto

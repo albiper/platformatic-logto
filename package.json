@@ -1,0 +1,49 @@
+{
+  "name": "@albirex/platformatic-logto",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "npm run lint && npm run build-ts",
+    "build-ts": "tsc",
+    "lint": "eslint",
+    "test": "tap --tsconfig=tsconfig.test.json --disable-coverage --jobs=1 --reporter=spec test/**/*.test.ts"
+  },
+  "peerDependencies": {
+    "fastify": "< 5.3.3",
+    "platformatic": ">=2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@types/node": "^22.10.1",
+    "eslint": "^9.12.0",
+    "tap": "^21.1.0",
+    "typescript": "~5.5",
+    "typescript-eslint": "^8.16.0"
+  },
+  "dependencies": {
+    "@albirex/fastify-logto": "link:../../../Library/pnpm/global/5/node_modules/@albirex/fastify-logto",
+    "@fastify/error": "^4.1.0",
+    "@platformatic/db": "^2.66.0",
+    "@platformatic/db-authorization": "^2.66.0",
+    "@sinclair/typebox": "^0.34.14",
+    "fastify-plugin": "^4.5.1",
+    "fastify-user": "^1.4.0",
+    "globals": "^15.11.0",
+    "leven": "^4.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.10.0",
+  "pnpm": {
+    "overrides": {
+      "cookie": "1.0.0"
+    }
+  }
+}
