@@ -1,0 +1,16 @@
+diff --git a/lib/utils/angular.d.ts b/lib/utils/angular.d.ts
+index 07d78c20bc51219d5eb655eaa9aad57ade271878..30b5a9f93f37c4449173fd2865148e378db8d4a2 100644
+--- a/lib/utils/angular.d.ts
++++ b/lib/utils/angular.d.ts
+@@ -1,4 +1,4 @@
+-import { type OpenIdConfiguration } from 'angular-auth-oidc-client';
++//import { type OpenIdConfiguration } from 'angular-auth-oidc-client';
+ import { Prompt } from '../consts/index.js';
+ import { type SignInUriParameters } from '../index.js';
+ /** The Logto configuration object for Angular apps. */
+@@ -109,4 +109,4 @@ export type LogtoAngularConfig = {
+  * @see {@link https://angular-auth-oidc-client.com/ | angular-auth-oidc-client} to learn more
+  * about how to use the library.
+  */
+-export declare const buildAngularAuthConfig: (logtoConfig: LogtoAngularConfig) => OpenIdConfiguration;
++// export declare const buildAngularAuthConfig: (logtoConfig: LogtoAngularConfig) => OpenIdConfiguration;

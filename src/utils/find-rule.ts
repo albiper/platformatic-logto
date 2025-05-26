@@ -1,6 +1,8 @@
 'use strict'
 
-function findRule (rules, roles) {
+import { PlatformaticRule } from '../index.js'
+
+function findRule(rules: PlatformaticRule[], roles: string[]) {
   let found = null
   for (const rule of rules) {
     for (const role of roles) {

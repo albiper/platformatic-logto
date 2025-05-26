@@ -5,17 +5,16 @@
         "esModuleInterop": true,
         "declaration": true,
         "moduleResolution": "nodenext",
-        "allowImportingTsExtensions": true,
         "lib": [
             "ESNext",
             "DOM"
         ],
         "rootDir": "src",
-        "outDir": "dist",
+        "outDir": "lib",
     },
     "exclude": [
         "node_modules",
-        "dist",
+        "lib",
         "test"
     ],
 }

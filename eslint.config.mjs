@@ -16,8 +16,8 @@ export default [
     ignores: [
       'global.d.ts',
       'node_modules/**',
-      'dist/**/*',
-      'dist/',
+      'lib/**/*',
+      'lib/',
       'types'
     ],
   },

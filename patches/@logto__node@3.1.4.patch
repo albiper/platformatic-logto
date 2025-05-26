@@ -1,0 +1,11 @@
+diff --git a/lib/src/utils/cookie-storage.d.ts b/lib/src/utils/cookie-storage.d.ts
+index bc4864358c791bf9189d8e1a1329fc8e1f857fc3..fddb088bdaf61682963c243482b814d688f054d2 100644
+--- a/lib/src/utils/cookie-storage.d.ts
++++ b/lib/src/utils/cookie-storage.d.ts
+@@ -1,5 +1,5 @@
+ import { type PersistKey, type Storage } from '@logto/client';
+-import { type CookieSerializeOptions } from 'cookie';
++import { type SerializeOptions as CookieSerializeOptions } from 'cookie';
+ import { PromiseQueue } from './promise-queue.js';
+ import { type SessionData } from './session.js';
+ type Nullable<T> = T | null;

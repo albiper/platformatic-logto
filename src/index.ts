@@ -1,14 +1,14 @@
-import '../global.d.ts'
 import fp from 'fastify-plugin'
 import leven from 'leven'
 import fastifyUser from 'fastify-user'
 
-import findRule from './utils/find-rule.ts'
-import { getRequestFromContext, getRoles } from './utils/utils.ts'
-import { Unauthorized, UnauthorizedField, MissingNotNullableError } from './utils/errors.ts'
+import findRule from './utils/find-rule.js'
+import { getRequestFromContext, getRoles } from './utils/utils.js'
+import { Unauthorized, UnauthorizedField, MissingNotNullableError } from './utils/errors.js'
 import fastifyLogto from '@albirex/fastify-logto';
 import { FastifyInstance } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
+import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
 
 const PLT_ADMIN_ROLE = 'platformatic-admin'
 
@@ -46,8 +46,8 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
         appId: opts.logtoAppId || 'your-app-id',
         appSecret: opts.logtoAppSecret || 'your-app-secret',
     });
-    await app.register(fastifyUser);
-    
+    await app.register(fastifyUser.default, opts.jwtPlugin);
+
     const adminSecret = opts.adminSecret
     const roleKey = opts.rolePath || opts.roleKey || 'X-PLATFORMATIC-ROLE'
     const userKey = opts.userPath || opts.userKey || 'X-PLATFORMATIC-USER-ID'
@@ -227,27 +227,29 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
 
             // We have subscriptions!
             let userPropToFillForPublish
-            let topicsWithoutChecks = false
-            if (app.platformatic.mq) {
-                for (const rule of rules) {
-                    const checks = rule.find?.checks
-                    if (typeof checks !== 'object') {
-                        topicsWithoutChecks = !!rule.find
-                        continue
-                    }
-                    const keys = Object.keys(checks)
-                    if (keys.length !== 1) {
-                        throw new Error(`Subscription requires that the role "${rule.role}" has only one check in the find rule for entity "${rule.entity}"`)
-                    }
-                    const key = keys[0]
+            const topicsWithoutChecks = false
 
-                    const val = typeof checks[key] === 'object' ? checks[key].eq : checks[key]
-                    if (userPropToFillForPublish && userPropToFillForPublish.val !== val) {
-                        throw new Error('Unable to configure subscriptions and authorization due to multiple check clauses in find')
-                    }
-                    userPropToFillForPublish = { key, val }
-                }
-            }
+            // mqtt
+            // if (app.platformatic.mq) {
+            //     for (const rule of rules) {
+            //         const checks = rule.find?.checks
+            //         if (typeof checks !== 'object') {
+            //             topicsWithoutChecks = !!rule.find
+            //             continue
+            //         }
+            //         const keys = Object.keys(checks)
+            //         if (keys.length !== 1) {
+            //             throw new Error(`Subscription requires that the role "${rule.role}" has only one check in the find rule for entity "${rule.entity}"`)
+            //         }
+            //         const key = keys[0]
+
+            //         const val = typeof checks[key] === 'object' ? checks[key].eq : checks[key]
+            //         if (userPropToFillForPublish && userPropToFillForPublish.val !== val) {
+            //             throw new Error('Unable to configure subscriptions and authorization due to multiple check clauses in find')
+            //         }
+            //         userPropToFillForPublish = { key, val }
+            //     }
+            // }
 
             if (userPropToFillForPublish && topicsWithoutChecks) {
                 throw new Error(`Subscription for entity "${entityKey}" have conflictling rules across roles`)
@@ -267,19 +269,19 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
             // fields are specified
             checkSaveMandatoryFieldsInRules(type, rules)
 
-            function useOriginal(skipAuth, ctx) {
-                if (skipAuth === false && !ctx) {
-                    throw new Error('Cannot set skipAuth to `false` without ctx')
-                }
+            // function useOriginal(skipAuth: boolean, ctx: PlatformaticContext) {
+            //     if (skipAuth === false && !ctx) {
+            //         throw new Error('Cannot set skipAuth to `false` without ctx')
+            //     }
 
-                return skipAuth || !ctx
-            }
+            //     return skipAuth || !ctx
+            // }
 
             app.platformatic.addEntityHooks(entityKey, {
-                async find(originalFind, { where, ctx, fields, skipAuth, ...restOpts } = {}) {
-                    if (useOriginal(skipAuth, ctx)) {
-                        return originalFind({ ...restOpts, where, ctx, fields })
-                    }
+                async find(originalFind, { where, ctx, fields, ...restOpts } = {}) {
+                    // if (useOriginal(skipAuth, ctx)) {
+                    //     return originalFind({ ...restOpts, where, ctx, fields })
+                    // }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
                     checkFieldsFromRule(rule.find, fields || Object.keys(app.platformatic.entities[entityKey].fields))
@@ -287,10 +289,10 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
 
                     return originalFind({ ...restOpts, where, ctx, fields })
                 },
-                async save(originalSave, { input, ctx, fields, skipAuth, ...restOpts }) {
-                    if (useOriginal(skipAuth, ctx)) {
-                        return originalSave({ ctx, input, fields, ...restOpts })
-                    }
+                async save(originalSave, { input, ctx, fields, ...restOpts }) {
+                    // if (useOriginal(skipAuth, ctx)) {
+                    //     return originalSave({ ctx, input, fields, ...restOpts })
+                    // }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
 
@@ -311,12 +313,9 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
                         }
                     }
 
-                    let hasAllPrimaryKeys = false
+                    const hasAllPrimaryKeys = input[type.primaryKey] !== undefined;
                     const whereConditions = {}
-                    for (const key of type.primaryKeys) {
-                        hasAllPrimaryKeys = hasAllPrimaryKeys || input[key] !== undefined
-                        whereConditions[key] = { eq: input[key] }
-                    }
+                    whereConditions[type.primaryKey] = { eq: input[type.primaryKey] }
 
                     if (hasAllPrimaryKeys) {
                         const where = await fromRuleToWhere(ctx, rule.save, whereConditions, request.user)
@@ -337,10 +336,10 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
                     return originalSave({ input, ctx, fields, ...restOpts })
                 },
 
-                async insert(originalInsert, { inputs, ctx, fields, skipAuth, ...restOpts }) {
-                    if (useOriginal(skipAuth, ctx)) {
-                        return originalInsert({ inputs, ctx, fields, ...restOpts })
-                    }
+                async insert(originalInsert, { inputs, ctx, fields, ...restOpts }) {
+                    // if (useOriginal(skipAuth, ctx)) {
+                    //     return originalInsert({ inputs, ctx, fields, ...restOpts })
+                    // }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
 
@@ -368,10 +367,10 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
                     return originalInsert({ inputs, ctx, fields, ...restOpts })
                 },
 
-                async delete(originalDelete, { where, ctx, fields, skipAuth, ...restOpts }) {
-                    if (useOriginal(skipAuth, ctx)) {
-                        return originalDelete({ where, ctx, fields, ...restOpts })
-                    }
+                async delete(originalDelete, { where, ctx, fields, ...restOpts }) {
+                    // if (useOriginal(skipAuth, ctx)) {
+                    //     return originalDelete({ where, ctx, fields, ...restOpts })
+                    // }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
 
@@ -380,10 +379,10 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
                     return originalDelete({ where, ctx, fields, ...restOpts })
                 },
 
-                async updateMany(originalUpdateMany, { where, ctx, fields, skipAuth, ...restOpts }) {
-                    if (useOriginal(skipAuth, ctx)) {
-                        return originalUpdateMany({ ...restOpts, where, ctx, fields })
-                    }
+                async updateMany(originalUpdateMany, { where, ctx, fields, ...restOpts }) {
+                    // if (useOriginal(skipAuth, ctx)) {
+                    //     return originalUpdateMany({ ...restOpts, where, ctx, fields })
+                    // }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
 
@@ -391,38 +390,12 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
 
                     return originalUpdateMany({ ...restOpts, where, ctx, fields })
                 },
-
-                async getPublishTopic(original, opts) {
-                    const request = opts.ctx?.reply.request
-                    const originalTopic = await original(opts)
-                    if (userPropToFillForPublish && request) {
-                        return `/${userPropToFillForPublish.key}/${request.user[userPropToFillForPublish.val]}${originalTopic}`
-                    }
-                    return originalTopic
-                },
-
-                async getSubscriptionTopic(original, opts) {
-                    const { ctx } = opts
-                    const request = getRequestFromContext(ctx)
-                    await request.setupDBAuthorizationUser()
-
-                    // TODO make sure anonymous users cannot subscribe
-
-                    const originalTopic = await original(opts)
-
-                    /* istanbul ignore next */
-                    if (userPropToFillForPublish) {
-                        return `/${userPropToFillForPublish.key}/${request.user[userPropToFillForPublish.val] || '+'}${originalTopic}`
-                    }
-
-                    return originalTopic
-                },
             })
         }
     })
 }
 
-async function fromRuleToWhere(ctx, rule, where, user) {
+async function fromRuleToWhere(ctx: PlatformaticContext, rule, where, user) {
     if (!rule) {
         throw new Unauthorized()
     }
@@ -462,7 +435,7 @@ async function fromRuleToWhere(ctx, rule, where, user) {
     return where
 }
 
-async function findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath = false) {
+async function findRuleForRequestUser(ctx: PlatformaticContext, rules: PlatformaticRule[], roleKey: string, anonymousRole: string, isRolePath = false) {
     const request = getRequestFromContext(ctx)
     await request.setupDBAuthorizationUser()
     const roles = getRoles(request, roleKey, anonymousRole, isRolePath)
@@ -515,7 +488,7 @@ function checkInputFromRuleFields(rule, inputs) {
     }
 }
 
-function checkSaveMandatoryFieldsInRules(type, rules) {
+function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
     // List of not nullable, not PKs field to validate save/insert when allowed fields are specified on the rule
     const mandatoryFields =
         Object.values(type.fields)
