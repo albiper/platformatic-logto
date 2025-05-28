@@ -1,0 +1,22 @@
+{
+    "$schema": "https://schemas.platformatic.dev/@platformatic/db/2.63.3.json",
+    "db": {
+        "connectionString": "{DATABASE_URL}",
+        "openapi": true,
+        "schemalock": true
+    },
+    "server": {
+        "hostname": "{PLT_SERVER_HOSTNAME}",
+        "port": "{PORT}",
+        "logger": {
+            "level": "{PLT_SERVER_LOGGER_LEVEL}"
+        }
+    },
+    "migrations": {
+        "dir": "migrations",
+        "autoApply": "{PLT_APPLY_MIGRATIONS}"
+    },
+    "types": {
+        "autogenerate": true
+    }
+}
