@@ -61,7 +61,7 @@ jobs:
           registry-url: https://npm.pkg.github.com/
       - run: 'sed -i -E "s/\"name\": \"@albirex/\"name\": \"@albiper/g" package.json'
       - run: pnpm i
-      - run: echo "albirex:registry=https://npm.pkg.github.com/" > .npmrc
+      - run: echo "@albiper:registry=https://npm.pkg.github.com/" > .npmrc
       - run: pnpm publish --no-git-checks
         env:
           GH_TOKEN: ${{secrets.GIT_HUB_TOKEN}}
