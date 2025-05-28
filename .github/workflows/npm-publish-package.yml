@@ -64,4 +64,4 @@ jobs:
       - run: echo "@albiper:registry=https://npm.pkg.github.com/" > .npmrc
       - run: pnpm publish --no-git-checks
         env:
-          GH_TOKEN: ${{secrets.GIT_HUB_TOKEN}}
+          GH_TOKEN: ${{secrets.GH_TOKEN}}
