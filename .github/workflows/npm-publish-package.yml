@@ -59,8 +59,9 @@ jobs:
           cache: pnpm
           node-version: 20
           registry-url: https://npm.pkg.github.com/
+      - run: 'sed -i -E "s/\"name\": \"@albirex/\"name\": \"@albiper/g" package.json'
       - run: pnpm i
       - run: echo "albirex:registry=https://npm.pkg.github.com/" > .npmrc
       - run: pnpm publish --no-git-checks
         env:
-          NPM_TOKEN: ${{secrets.GIT_HUB_TOKEN}}
+          GH_TOKEN: ${{secrets.GIT_HUB_TOKEN}}
