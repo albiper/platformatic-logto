@@ -23,7 +23,7 @@ jobs:
       - run: pnpm i
       - run: pnpm build
 
-  publish-gpr:
+  publish-npm:
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -43,3 +43,23 @@ jobs:
       - run: pnpm publish --no-git-checks
         env:
           NPM_TOKEN: ${{secrets.NPM_ACCESS_TOKEN}}
+  publish-gpr:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10.10.0
+      - uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 20
+          registry-url: https://npm.pkg.github.com/
+      - run: pnpm i
+      - run: pnpm publish --no-git-checks
+        env:
+          NPM_TOKEN: ${{secrets.GITHUB_TOKEN}}
