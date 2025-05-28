@@ -17,15 +17,18 @@
     "build-ts": "tsc",
     "lint": "eslint",
     "prepack": "pnpm build",
-    "test": "tap --tsconfig=tsconfig.test.json --disable-coverage --jobs=1 --reporter=spec test/**/*.test.ts"
+    "test": "tap --tsconfig=tsconfig.test.json --disable-coverage --jobs=1 test/**/*.test.ts"
   },
   "peerDependencies": {
     "fastify": "^5.0.0",
-    "platformatic": ">=2"
+    "platformatic": ">=2",
+    "@platformatic/db": "^2.66.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.12.0",
+    "@platformatic/db-core": "^2.66.1",
     "@types/node": "^22.10.1",
+    "dotenv": "^16.5.0",
     "eslint": "^9.12.0",
     "tap": "^21.1.0",
     "typescript": "~5.5",
@@ -36,7 +39,6 @@
     "@fastify/error": "^4.1.0",
     "@logto/js": "^5.1.1",
     "@logto/node": "^3.1.4",
-    "@platformatic/db": "^2.66.0",
     "@platformatic/db-authorization": "^2.66.0",
     "@platformatic/sql-mapper": "^2.66.0",
     "@sinclair/typebox": "^0.34.14",
