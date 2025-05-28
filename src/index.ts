@@ -166,8 +166,6 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
 
         if (forceAdminRole) {
             // We replace just the role in `request.user`, all the rest is untouched
-            console.log(this.user);
-
             this.user = {
                 // ...request.user,
                 [roleKey]: PLT_ADMIN_ROLE,
