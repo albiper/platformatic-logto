@@ -43,7 +43,7 @@ app.register(logtoPlugin, {
 await app.listen();
 ```
 
-Ensure you replace 'your-logto-app-id', 'your-logto-app-secret', and 'https://your-logto-endpoint' with your actual Logto application credentials and endpoint.
+**Ensure you replace '_your-logto-app-id_', '_your-logto-app-secret_', and 'https://your-logto-endpoint' with your actual Logto application credentials and endpoint.**
 
 ## Configuration Options
 The logtoPlugin accepts the following configuration options:
