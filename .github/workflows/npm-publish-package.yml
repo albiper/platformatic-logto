@@ -61,7 +61,10 @@ jobs:
           registry-url: https://npm.pkg.github.com/
       - run: 'sed -i -E "s/\"name\": \"@albirex/\"name\": \"@albiper/g" package.json'
       - run: pnpm i
-      - run: echo "@albiper:registry=https://npm.pkg.github.com/" > .npmrc
+      - name: Configure .npmrc for GitHub Packages
+        run: |
+          echo "@albiper:registry=https://npm.pkg.github.com/" > ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_TOKEN }}" >> ~/.npmrc
       - name: Check npm auth
         run: npm whoami
         env:
