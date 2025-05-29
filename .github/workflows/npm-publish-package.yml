@@ -65,6 +65,9 @@ jobs:
         run: |
           echo "@albiper:registry=https://npm.pkg.github.com/" > ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_TOKEN }}" >> ~/.npmrc
+      - name: echo npmrc
+        run: |
+          echo ~/.npmrc
       - name: Check npm auth
         run: npm whoami
         env:
