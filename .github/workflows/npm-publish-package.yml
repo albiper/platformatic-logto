@@ -62,8 +62,8 @@ jobs:
       - run: 'sed -i -E "s/\"name\": \"@albirex/\"name\": \"@albiper/g" package.json'
       - run: pnpm i
       - run: echo "@albiper:registry=https://npm.pkg.github.com/" > .npmrc
-      - name: Debug GH_TOKEN
-        run: "echo \"GH_TOKEN starts with: ${GH_TOKEN:0:4}\""
+      - name: Check npm auth
+        run: npm whoami
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - run: pnpm publish --no-git-checks
