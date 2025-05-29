@@ -61,7 +61,7 @@ The logtoPlugin accepts the following configuration options:
 You can also provide custom handlers for specific events, such as token validation or user session management.
 
 ## License
-This project is licensed under the MIT License.
+This project is licensed under the GPL License.
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
