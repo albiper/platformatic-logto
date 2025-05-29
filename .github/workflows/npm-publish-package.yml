@@ -67,7 +67,7 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_TOKEN }}" >> ~/.npmrc
       - name: echo npmrc
         run: |
-          echo ~/.npmrc
+          cat ~/.npmrc
       - name: Check npm auth
         run: npm whoami
         env:
