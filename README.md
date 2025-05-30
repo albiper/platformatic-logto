@@ -1,9 +1,9 @@
-<center>
+<p align="center">
 <img alt="NPM Version" src="https://img.shields.io/npm/v/%40albirex%2Fplatformatic-logto">
 <img alt="GitHub License" src="https://img.shields.io/github/license/albiper/platformatic-logto">
 <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/albiper/platformatic-logto/npm-publish-package.yml">
 <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/%40albirex%2Fplatformatic-logto">
-</center>
+</p>
 <br/>
 
 # Platformatic Logto Integration
