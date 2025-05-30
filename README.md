@@ -1,5 +1,5 @@
 [![npm version](https://img.shields.io/npm/v/@albirex/platformatic-logto.svg)](https://www.npmjs.com/package/@albirex/platformatic-logto)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+![GitHub License](https://img.shields.io/github/license/albiper/platformatic-logto)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/albiper/platformatic-logto/npm-publish-package.yml)
 
 # Platformatic Logto Integration
