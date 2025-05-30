@@ -12,7 +12,7 @@ Based on [@platformatic/db-authorization](https://github.com/platformatic/platfo
 ## Installation
 To install the package, use your preferred package manager:
 
-```
+```bash
 npm install @albirex/platformatic-logto
 # or
 yarn add @albirex/platformatic-logto
@@ -21,7 +21,7 @@ pnpm add @albirex/platformatic-logto
 ```
 ## Usage
 Here's a basic example of how to integrate platformatic-logto into your Platformatic application:
-```
+```javascript
 import { buildServer } from 'platformatic';
 import { logtoPlugin } from 'platformatic-logto';
 
