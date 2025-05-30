@@ -1,6 +1,10 @@
-[![npm version](https://img.shields.io/npm/v/@albirex/platformatic-logto.svg)](https://www.npmjs.com/package/@albirex/platformatic-logto)
-![GitHub License](https://img.shields.io/github/license/albiper/platformatic-logto)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/albiper/platformatic-logto/npm-publish-package.yml)
+<center>
+<img alt="NPM Version" src="https://img.shields.io/npm/v/%40albirex%2Fplatformatic-logto">
+<img alt="GitHub License" src="https://img.shields.io/github/license/albiper/platformatic-logto">
+<img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/albiper/platformatic-logto/npm-publish-package.yml">
+<img alt="NPM Downloads" src="https://img.shields.io/npm/dm/%40albirex%2Fplatformatic-logto">
+</center>
+<br/>
 
 # Platformatic Logto Integration
 This project provides a seamless integration between [Platformatic](https://platformatic.dev/) and [Logto](https://logto.io/), enabling robust authentication and authorization mechanisms in your Platformatic applications.
@@ -52,14 +56,14 @@ await app.listen();
 ## Configuration Options
 The logtoPlugin accepts the following configuration options:
 
-| Property | Type | Description |
-| ----- | ----------------- | ------------- |
-| appId | string | Your Logto application's ID. |
-| appSecret | string | Your Logto application's secret. |
-| endpoint | string | The base URL of your Logto instance. |
-| audience | string, optional | Specify the intended audience for the tokens. |
-| scopes | string[], optional | Define the scopes required for your application. |
-| redirectUri | string, optional | The URI to redirect to after authentication. |
+| Property    | Type               | Description                                      |
+| ----------- | ------------------ | ------------------------------------------------ |
+| appId       | string             | Your Logto application's ID.                     |
+| appSecret   | string             | Your Logto application's secret.                 |
+| endpoint    | string             | The base URL of your Logto instance.             |
+| audience    | string, optional   | Specify the intended audience for the tokens.    |
+| scopes      | string[], optional | Define the scopes required for your application. |
+| redirectUri | string, optional   | The URI to redirect to after authentication.     |
 
 
 You can also provide custom handlers for specific events, such as token validation or user session management.
