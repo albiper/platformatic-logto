@@ -13,11 +13,11 @@ Based on [@platformatic/db-authorization](https://github.com/platformatic/platfo
 To install the package, use your preferred package manager:
 
 ```
-npm install platformatic-logto
+npm install @albirex/platformatic-logto
 # or
-yarn add platformatic-logto
+yarn add @albirex/platformatic-logto
 # or
-pnpm add platformatic-logto
+pnpm add @albirex/platformatic-logto
 ```
 ## Usage
 Here's a basic example of how to integrate platformatic-logto into your Platformatic application:
