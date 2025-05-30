@@ -17,8 +17,8 @@ importers:
   .:
     dependencies:
       '@albirex/fastify-logto':
-        specifier: ^1.1.4
-        version: 1.1.4(@fastify/session@11.1.0)(fastify@5.3.3)
+        specifier: ^1.2.3
+        version: 1.2.3(@fastify/session@11.1.0)(fastify@5.3.3)
       '@fastify/error':
         specifier: ^4.1.0
         version: 4.1.0
@@ -86,8 +86,8 @@ importers:
 
 packages:
 
-  '@albirex/fastify-logto@1.1.4':
-    resolution: {integrity: sha512-Xlcx6BCC7tIsTu3RowTLUoMReshDwsrvHAG9mTaxZs4pbaz+LY3A5ak5vnL3eramaXsAN7qj6traVbQ6W+OLuw==}
+  '@albirex/fastify-logto@1.2.3':
+    resolution: {integrity: sha512-1ltta7hI3sjcl4nebj0HKM9i+siiyRhj2bpIfyYqqwMRD+0Jgut2E2qiiA9uiRLkTtBKmPM3MhGZxXncfttu6w==}
     peerDependencies:
       '@fastify/session': ^11.1.0
       fastify: ^5.0.0
@@ -3481,9 +3481,8 @@ packages:
 
 snapshots:
 
-  '@albirex/fastify-logto@1.1.4(@fastify/session@11.1.0)(fastify@5.3.3)':
+  '@albirex/fastify-logto@1.2.3(@fastify/session@11.1.0)(fastify@5.3.3)':
     dependencies:
-      '@albirex/fastify-logto': 'link:'
       '@fastify/cookie': 11.0.2
       '@fastify/session': 11.1.0
       '@logto/node': 3.1.4(patch_hash=13b8e11c424c582c839ca6ea4bb5fefba099064dbf4c0dacd6793e37e09373f9)
