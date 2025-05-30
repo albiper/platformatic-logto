@@ -66,7 +66,7 @@ jobs:
           echo "@albiper:registry=https://npm.pkg.github.com/" > ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_TOKEN }}" >> ~/.npmrc
       - name: Check npm auth
-        run: npm whoami npm whoami --registry=https://npm.pkg.github.com/
+        run: npm whoami --registry=https://npm.pkg.github.com/
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - run: pnpm publish --no-git-checks
