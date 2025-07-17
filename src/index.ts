@@ -141,7 +141,7 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
 
         let forceAdminRole = false
         if (adminSecret && this.headers['x-platformatic-admin-secret'] === adminSecret) {
-            if (opts.jwtPlugin) {
+            if (opts.jwtPlugin.jwt) {
                 forceAdminRole = true
             } else {
                 this.log.info('admin secret is valid')
