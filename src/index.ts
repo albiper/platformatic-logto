@@ -1,5 +1,5 @@
 import fp from 'fastify-plugin'
-import leven from 'leven'
+import * as leven from 'leven'
 import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
@@ -179,7 +179,8 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
         const entities = Object.keys(app.platformatic.entities)
 
         const nearest = entities.reduce((acc, entity) => {
-            const distance = leven(ruleEntity, entity)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const distance = (leven as any)(ruleEntity, entity)
             if (distance < acc.distance) {
                 acc.distance = distance
                 acc.entity = entity
