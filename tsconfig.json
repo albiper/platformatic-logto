@@ -3,6 +3,7 @@
         "target": "ESNext",
         "module": "NodeNext",
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "declaration": true,
         "moduleResolution": "nodenext",
         "lib": [

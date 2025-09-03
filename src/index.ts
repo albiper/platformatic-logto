@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin'
 import leven from 'leven'
-import fastifyUser from 'fastify-user'
+import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
 import { getRequestFromContext, getRoles } from './utils/utils.js'
@@ -46,7 +46,8 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
         appId: opts.logtoAppId || 'your-app-id',
         appSecret: opts.logtoAppSecret || 'your-app-secret',
     });
-    await app.register(fastifyUser.default, opts.jwtPlugin);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await app.register(fastifyUser as any, opts.jwtPlugin);
 
     const adminSecret = opts.adminSecret
     const roleKey = opts.rolePath || opts.roleKey || 'X-PLATFORMATIC-ROLE'
