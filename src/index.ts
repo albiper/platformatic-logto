@@ -1,12 +1,12 @@
 import fp from 'fastify-plugin'
-import * as leven from 'leven'
+import leven from 'leven'
 import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
 import { getRequestFromContext, getRoles } from './utils/utils.js'
 import { Unauthorized, UnauthorizedField, MissingNotNullableError } from './utils/errors.js'
 import fastifyLogto from '@albirex/fastify-logto';
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
 import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
 
@@ -40,7 +40,7 @@ export type PlatformaticLogtoAuthOptions = {
     jwtPlugin: FastifyUserPluginOptions
 };
 
-async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
+const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) => {
     app.register(fastifyLogto, {
         endpoint: opts.logtoBaseUrl || 'https://auth.example.com',
         appId: opts.logtoAppId || 'your-app-id',
@@ -179,8 +179,8 @@ async function auth(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) {
         const entities = Object.keys(app.platformatic.entities)
 
         const nearest = entities.reduce((acc, entity) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const distance = (leven as any)(ruleEntity, entity)
+
+            const distance = leven(ruleEntity, entity)
             if (distance < acc.distance) {
                 acc.distance = distance
                 acc.entity = entity
@@ -508,4 +508,4 @@ function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
     }
 }
 
-export default fp(auth)
+export default fp(auth, {name: '@albirex/platformatic-logto'})

@@ -7,5 +7,5 @@ export default defineConfig({
     dts: true,                 // generate .d.ts files
     sourcemap: true,           // optional but useful
     clean: true,                // remove old build files before building,
-    minify: true
+    // minify: true
 });
