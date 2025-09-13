@@ -1,5 +1,3 @@
-overrides:
-  '@albirex/fastify-logto': link:../../../Library/pnpm/global/5/node_modules/@albirex/fastify-logto
 patchedDependencies:
   '@logto/node@3.1.4': patches/@logto__node@3.1.4.patch
   '@logto/js@5.1.1': patches/@logto__js@5.1.1.patch

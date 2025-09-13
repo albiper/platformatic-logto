@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@albirex/fastify-logto': link:../../../Library/pnpm/global/5/node_modules/@albirex/fastify-logto
-
 patchedDependencies:
   '@logto/js@5.1.1':
     hash: 3dc540c8409884dfe1378d8d5034c1db39b7a47388c5661ea1313a25e01d7667
@@ -20,8 +17,8 @@ importers:
   .:
     dependencies:
       '@albirex/fastify-logto':
-        specifier: link:../../../Library/pnpm/global/5/node_modules/@albirex/fastify-logto
-        version: link:../../../Library/pnpm/global/5/node_modules/@albirex/fastify-logto
+        specifier: ^1.3.2
+        version: 1.3.2(@fastify/session@11.1.0)(fastify@5.2.1)
       '@fastify/error':
         specifier: ^4.1.0
         version: 4.1.0
@@ -91,6 +88,12 @@ importers:
         version: 8.32.1(eslint@9.27.0)(typescript@5.5.4)
 
 packages:
+
+  '@albirex/fastify-logto@1.3.2':
+    resolution: {integrity: sha512-sV/RA8LzAbpMbsuer8SEtoBd9tFgU+jOmtxDX24y0L72PolcVXJaQ/7bkv6EqdXQ7CB1JStoGwl9TURv+VENvg==}
+    peerDependencies:
+      '@fastify/session': ^11.1.0
+      fastify: ^5.2.2
 
   '@alcalzone/ansi-tokenize@0.1.3':
     resolution: {integrity: sha512-3yWxPTq3UQ/FY9p1ErPxIyfT64elWaMvM9lIHnaqpyft63tkxodF5aUElYHrdisWve5cETkh1+KBw1yJuW0aRw==}
@@ -394,6 +397,9 @@ packages:
   '@fastify/basic-auth@6.2.0':
     resolution: {integrity: sha512-Ao9Jf8TyW8v7p3CPy++c+E3qcCDeWfAlSIfFo0CsKrfvm81i0OCpnobIMwaSSkg/At0rzsLzbJPDWrgNru0G1w==}
 
+  '@fastify/cookie@11.0.2':
+    resolution: {integrity: sha512-GWdwdGlgJxyvNv+QcKiGNevSspMQXncjMZ1J8IvuDQk0jvkzgWWZFNC2En3s+nHndZBGV8IbLwOI/sxCZw/mzA==}
+
   '@fastify/cors@10.1.0':
     resolution: {integrity: sha512-MZyBCBJtII60CU9Xme/iE4aEy8G7QpzGR8zkdXZkDFt7ElEMachbE61tfhAG/bvSaULlqlf0huMT12T7iqEmdQ==}
 
@@ -423,6 +429,9 @@ packages:
 
   '@fastify/send@4.1.0':
     resolution: {integrity: sha512-TMYeQLCBSy2TOFmV95hQWkiTYgC/SEx7vMdV+wnZVX4tt8VBLKzmH8vV9OzJehV0+XBfg+WxPMt5wp+JBUKsVw==}
+
+  '@fastify/session@11.1.0':
+    resolution: {integrity: sha512-OxAX79PtVyTKxfmHT8e0jDFliw/2EmhOxe1Mj35jhL20j8CEpj5Li2zOVi5PqHc5Y+7N2w0tOmtM8mB6NjAIGw==}
 
   '@fastify/static@8.2.0':
     resolution: {integrity: sha512-PejC/DtT7p1yo3p+W7LiUtLMsV8fEvxAK15sozHy9t8kwo5r0uLYmhV/inURmGz1SkHZFz/8CNtHLPyhKcx4SQ==}
@@ -4100,6 +4109,14 @@ packages:
 
 snapshots:
 
+  '@albirex/fastify-logto@1.3.2(@fastify/session@11.1.0)(fastify@5.2.1)':
+    dependencies:
+      '@fastify/cookie': 11.0.2
+      '@fastify/session': 11.1.0
+      '@logto/node': 3.1.4(patch_hash=13b8e11c424c582c839ca6ea4bb5fefba099064dbf4c0dacd6793e37e09373f9)
+      fastify: 5.2.1
+      fastify-plugin: 5.0.1
+
   '@alcalzone/ansi-tokenize@0.1.3':
     dependencies:
       ansi-styles: 6.2.1
@@ -4374,6 +4391,11 @@ snapshots:
       '@fastify/error': 4.1.0
       fastify-plugin: 5.0.1
 
+  '@fastify/cookie@11.0.2':
+    dependencies:
+      cookie: 1.0.2
+      fastify-plugin: 5.0.1
+
   '@fastify/cors@10.1.0':
     dependencies:
       fastify-plugin: 5.0.1
@@ -4417,6 +4439,11 @@ snapshots:
       fast-decode-uri-component: 1.0.1
       http-errors: 2.0.0
       mime: 3.0.0
+
+  '@fastify/session@11.1.0':
+    dependencies:
+      fastify-plugin: 5.0.1
+      safe-stable-stringify: 2.5.0
 
   '@fastify/static@8.2.0':
     dependencies:
