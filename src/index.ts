@@ -1,5 +1,4 @@
 import fp from 'fastify-plugin'
-import leven from 'leven'
 import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
@@ -46,8 +45,8 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
         appId: opts.logtoAppId || 'your-app-id',
         appSecret: opts.logtoAppSecret || 'your-app-secret',
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await app.register(fastifyUser as any, opts.jwtPlugin);
+
+    await app.register(fastifyUser as unknown as FastifyPluginAsync, opts.jwtPlugin);
 
     const adminSecret = opts.adminSecret
     const roleKey = opts.rolePath || opts.roleKey || 'X-PLATFORMATIC-ROLE'
@@ -82,12 +81,24 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
 
             for (const scope of scopes) {
                 const roleName = role.name;
-                const [scopeAction, entity] = scope.name.split(':');
+                // eslint-disable-next-line prefer-const
+                let [scopeAction, entity] = scope.name.split(':');
 
                 if (!app.platformatic.entities[entity]) {
-                    const nearest = findNearestEntity(entity)
-                    app.log.warn(`Unknown entity '${entity}' in authorization rule. Did you mean '${nearest.entity}'?`)
+                    app.log.debug(`Unknown entity '${entity}' in authorization rule`)
                     continue;
+                }
+
+                switch (scopeAction) {
+                    case 'create':
+                        scopeAction = 'save'
+                        break;
+                    case 'read':
+                        scopeAction = 'find'
+                        break;
+                    case 'update':
+                        scopeAction = 'updateMany'
+                        break;
                 }
 
                 const checkExists = rules.find(r => r.role === roleName && r.entity === entity);
@@ -126,6 +137,27 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
                     rules.push(newRule);
                 }
             }
+        }
+
+        const logRules = rules.reduce((prev, curr) => {
+            (prev[curr['role']] ??= []).push(curr);
+            return prev;
+        }, {})
+
+        for (const key in logRules) {
+            app.log.info(`Rules set for role ${key}`);
+
+            for (const element of logRules[key]) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { entity, entities, role, ...other } = element;
+                app.log.info(`\t${entity ?? entities.join(',')}: ${JSON.stringify(other)}`);
+            }
+        }
+
+        const missingEntities = Object.keys(app.platformatic.entities).filter((e) => !rules.map((r) => r.entity).includes(e));
+
+        if (missingEntities.length) {
+            app.log.warn(`Missing rules for entities: ${missingEntities.join(', ')}`);
         }
 
         app.log.debug('LogTo calculated rules');
@@ -174,22 +206,6 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
         }
     }
 
-    function findNearestEntity(ruleEntity) {
-        // There is an unknown entity. Let's find out the nearest one for a nice error message
-        const entities = Object.keys(app.platformatic.entities)
-
-        const nearest = entities.reduce((acc, entity) => {
-
-            const distance = leven(ruleEntity, entity)
-            if (distance < acc.distance) {
-                acc.distance = distance
-                acc.entity = entity
-            }
-            return acc
-        }, { distance: Infinity, entity: null })
-        return nearest
-    }
-
     app.addHook('onReady', async function () {
         const rules = await composeLogToRules();
 
@@ -210,8 +226,7 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
             for (const ruleEntity of ruleEntities) {
                 const newRule = { ...rule, entity: ruleEntity, entities: undefined }
                 if (!app.platformatic.entities[newRule.entity]) {
-                    const nearest = findNearestEntity(ruleEntity)
-                    throw new Error(`Unknown entity '${ruleEntity}' in authorization rule ${i}. Did you mean '${nearest.entity}'?`)
+                    throw new Error(`Unknown entity '${ruleEntity}' in authorization rule ${i}`)
                 }
 
                 if (!entityRules[ruleEntity]) {
@@ -269,19 +284,15 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
             // fields are specified
             checkSaveMandatoryFieldsInRules(type, rules)
 
-            // function useOriginal(skipAuth: boolean, ctx: PlatformaticContext) {
-            //     if (skipAuth === false && !ctx) {
-            //         throw new Error('Cannot set skipAuth to `false` without ctx')
-            //     }
-
-            //     return skipAuth || !ctx
-            // }
+            function useOriginal(ctx: PlatformaticContext) {
+                return !ctx
+            }
 
             app.platformatic.addEntityHooks(entityKey, {
                 async find(originalFind, { where, ctx, fields, ...restOpts } = {}) {
-                    // if (useOriginal(skipAuth, ctx)) {
-                    //     return originalFind({ ...restOpts, where, ctx, fields })
-                    // }
+                    if (useOriginal(ctx)) {
+                        return originalFind({ ...restOpts, where, ctx, fields })
+                    }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
                     checkFieldsFromRule(rule.find, fields || Object.keys(app.platformatic.entities[entityKey].fields))
@@ -290,9 +301,9 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
                     return originalFind({ ...restOpts, where, ctx, fields })
                 },
                 async save(originalSave, { input, ctx, fields, ...restOpts }) {
-                    // if (useOriginal(skipAuth, ctx)) {
-                    //     return originalSave({ ctx, input, fields, ...restOpts })
-                    // }
+                    if (useOriginal(ctx)) {
+                        return originalSave({ ctx, input, fields, ...restOpts })
+                    }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
 
@@ -337,9 +348,9 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
                 },
 
                 async insert(originalInsert, { inputs, ctx, fields, ...restOpts }) {
-                    // if (useOriginal(skipAuth, ctx)) {
-                    //     return originalInsert({ inputs, ctx, fields, ...restOpts })
-                    // }
+                    if (useOriginal(ctx)) {
+                        return originalInsert({ inputs, ctx, fields, ...restOpts })
+                    }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
 
@@ -368,9 +379,9 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
                 },
 
                 async delete(originalDelete, { where, ctx, fields, ...restOpts }) {
-                    // if (useOriginal(skipAuth, ctx)) {
-                    //     return originalDelete({ where, ctx, fields, ...restOpts })
-                    // }
+                    if (useOriginal(ctx)) {
+                        return originalDelete({ where, ctx, fields, ...restOpts })
+                    }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
 
@@ -380,9 +391,9 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
                 },
 
                 async updateMany(originalUpdateMany, { where, ctx, fields, ...restOpts }) {
-                    // if (useOriginal(skipAuth, ctx)) {
-                    //     return originalUpdateMany({ ...restOpts, where, ctx, fields })
-                    // }
+                    if (useOriginal(ctx)) {
+                        return originalUpdateMany({ ...restOpts, where, ctx, fields })
+                    }
                     const request = getRequestFromContext(ctx)
                     const rule = await findRuleForRequestUser(ctx, rules, roleKey, anonymousRole, isRolePath)
 
@@ -508,4 +519,4 @@ function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
     }
 }
 
-export default fp(auth, {name: '@albirex/platformatic-logto'})
+export default fp(auth, { name: '@albirex/platformatic-logto' })
