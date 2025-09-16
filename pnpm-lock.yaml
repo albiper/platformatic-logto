@@ -17,8 +17,8 @@ importers:
   .:
     dependencies:
       '@albirex/fastify-logto':
-        specifier: ^1.3.2
-        version: 1.3.2(@fastify/session@11.1.0)(fastify@5.2.1)
+        specifier: ^1.3.3
+        version: 1.3.3(@fastify/session@11.1.0)(fastify@5.6.0)
       '@fastify/error':
         specifier: ^4.1.0
         version: 4.1.0
@@ -40,6 +40,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.34.14
         version: 0.34.33
+      fastify:
+        specifier: ^5.5
+        version: 5.6.0
       fastify-plugin:
         specifier: ^5.0.1
         version: 5.0.1
@@ -71,9 +74,6 @@ importers:
       eslint:
         specifier: ^9.12.0
         version: 9.27.0
-      fastify:
-        specifier: ~5.2
-        version: 5.2.1
       tap:
         specifier: ^21.1.0
         version: 21.1.0(@types/node@22.15.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
@@ -89,11 +89,11 @@ importers:
 
 packages:
 
-  '@albirex/fastify-logto@1.3.2':
-    resolution: {integrity: sha512-sV/RA8LzAbpMbsuer8SEtoBd9tFgU+jOmtxDX24y0L72PolcVXJaQ/7bkv6EqdXQ7CB1JStoGwl9TURv+VENvg==}
+  '@albirex/fastify-logto@1.3.3':
+    resolution: {integrity: sha512-+wTzswChEBobnkt5uqkOeMBocHpqs7NNenX710HKTvtfLef2p0jqSeu/8an5NsxjGpXCeg8L0jqPWJJv9o3ADw==}
     peerDependencies:
       '@fastify/session': ^11.1.0
-      fastify: ^5.2.2
+      fastify: ^5.5
 
   '@alcalzone/ansi-tokenize@0.1.3':
     resolution: {integrity: sha512-3yWxPTq3UQ/FY9p1ErPxIyfT64elWaMvM9lIHnaqpyft63tkxodF5aUElYHrdisWve5cETkh1+KBw1yJuW0aRw==}
@@ -2163,11 +2163,8 @@ packages:
   fastify-user@1.4.0:
     resolution: {integrity: sha512-VqGa60xX3nFCz2gIJHfdVjDlJIsdJ9bwigDdazaKlZ/lSxsyeXOnxsyxtZ9XeMht2drc6WLUtJ0MMeo1BSvXCg==}
 
-  fastify@5.2.1:
-    resolution: {integrity: sha512-rslrNBF67eg8/Gyn7P2URV8/6pz8kSAscFL4EThZJ8JBMaXacVdVE4hmUcnPNKERl5o/xTiBSLfdowBRhVF1WA==}
-
-  fastify@5.3.3:
-    resolution: {integrity: sha512-nCBiBCw9q6jPx+JJNVgO8JVnTXeUyrGcyTKPQikRkA/PanrFcOIo4R+ZnLeOLPZPGgzjomqfVarzE0kYx7qWiQ==}
+  fastify@5.6.0:
+    resolution: {integrity: sha512-9j2r9TnwNsfGiCKGYT0Voqy244qwcoYM9qvNi/i+F8sNNWDnqUEVuGYNc9GyjldhXmMlJmVPS6gI1LdvjYGRJw==}
 
   fastparallel@2.4.1:
     resolution: {integrity: sha512-qUmhxPgNHmvRjZKBFUNI0oZuuH9OlSIOXmJ98lhKPxMZZ7zS/Fi0wRHOihDSz0R1YiIOjxzOY4bq65YTcdBi2Q==}
@@ -3194,10 +3191,6 @@ packages:
   pino-std-serializers@7.0.0:
     resolution: {integrity: sha512-e906FRY0+tV27iq4juKzSYPbUj2do2X2JX4EzSca1631EB2QJQUqGbDuERal7LCtOpxl6x3+nvo9NPZcmjkiFA==}
 
-  pino@9.7.0:
-    resolution: {integrity: sha512-vnMCM6xZTb1WDmLvtG2lE/2p+t9hDEIvTWJsu6FejkE62vB7gDhvzrpFR4Cw2to+9JNQxVnkAKVPA1KPB98vWg==}
-    hasBin: true
-
   pino@9.9.4:
     resolution: {integrity: sha512-d1XorUQ7sSKqVcYdXuEYs2h1LKxejSorMEJ76XoZ0pPDf8VzJMe7GlPXpMBZeQ9gE4ZPIp5uGD+5Nw7scxiigg==}
     hasBin: true
@@ -4109,12 +4102,12 @@ packages:
 
 snapshots:
 
-  '@albirex/fastify-logto@1.3.2(@fastify/session@11.1.0)(fastify@5.2.1)':
+  '@albirex/fastify-logto@1.3.3(@fastify/session@11.1.0)(fastify@5.6.0)':
     dependencies:
       '@fastify/cookie': 11.0.2
       '@fastify/session': 11.1.0
       '@logto/node': 3.1.4(patch_hash=13b8e11c424c582c839ca6ea4bb5fefba099064dbf4c0dacd6793e37e09373f9)
-      fastify: 5.2.1
+      fastify: 5.6.0
       fastify-plugin: 5.0.1
 
   '@alcalzone/ansi-tokenize@0.1.3':
@@ -5166,8 +5159,8 @@ snapshots:
       env-schema: 6.0.1
       es-main: 1.3.0
       execa: 9.5.3
-      fastify: 5.3.3
-      fastify-metrics: 12.1.0(fastify@5.3.3)
+      fastify: 5.6.0
+      fastify-metrics: 12.1.0(fastify@5.6.0)
       fastify-plugin: 5.0.1
       fastify-print-routes: 4.1.0
       graphql: 16.11.0
@@ -5198,7 +5191,7 @@ snapshots:
       '@fastify/error': 4.1.0
       '@platformatic/utils': 2.66.0
       change-case-all: 2.1.0
-      fastify: 5.3.3
+      fastify: 5.6.0
       pino: 9.9.4
       undici: 7.11.0
 
@@ -5245,7 +5238,7 @@ snapshots:
       dotenv-tool: 0.1.1
       es-main: 1.3.0
       fastest-levenshtein: 1.0.16
-      fastify: 5.3.3
+      fastify: 5.6.0
       graphql: 16.11.0
       help-me: 5.0.0
       minimist: 1.2.8
@@ -5302,8 +5295,8 @@ snapshots:
       es-main: 1.3.0
       execa: 9.5.3
       fast-json-patch: 3.1.1
-      fastify: 5.3.3
-      fastify-metrics: 12.1.0(fastify@5.3.3)
+      fastify: 5.6.0
+      fastify-metrics: 12.1.0(fastify@5.6.0)
       fastify-plugin: 5.0.1
       graphql: 16.11.0
       help-me: 5.0.0
@@ -6882,9 +6875,9 @@ snapshots:
     dependencies:
       reusify: 1.1.0
 
-  fastify-metrics@12.1.0(fastify@5.3.3):
+  fastify-metrics@12.1.0(fastify@5.6.0):
     dependencies:
-      fastify: 5.3.3
+      fastify: 5.6.0
       fastify-plugin: 5.0.1
       prom-client: 15.1.3
 
@@ -6904,11 +6897,11 @@ snapshots:
     dependencies:
       '@fastify/error': 4.1.0
       '@fastify/jwt': 9.1.0
-      fastify: 5.2.1
+      fastify: 5.6.0
       fastify-plugin: 5.0.1
       get-jwks: 11.0.1
 
-  fastify@5.2.1:
+  fastify@5.6.0:
     dependencies:
       '@fastify/ajv-compiler': 4.0.2
       '@fastify/error': 4.1.0
@@ -6920,24 +6913,6 @@ snapshots:
       find-my-way: 9.3.0
       light-my-request: 6.6.0
       pino: 9.9.4
-      process-warning: 4.0.1
-      rfdc: 1.4.1
-      secure-json-parse: 3.0.2
-      semver: 7.7.2
-      toad-cache: 3.7.0
-
-  fastify@5.3.3:
-    dependencies:
-      '@fastify/ajv-compiler': 4.0.2
-      '@fastify/error': 4.1.0
-      '@fastify/fast-json-stringify-compiler': 5.0.3
-      '@fastify/proxy-addr': 5.0.0
-      abstract-logging: 2.0.1
-      avvio: 9.1.0
-      fast-json-stringify: 6.0.1
-      find-my-way: 9.3.0
-      light-my-request: 6.6.0
-      pino: 9.7.0
       process-warning: 5.0.0
       rfdc: 1.4.1
       secure-json-parse: 4.0.0
@@ -8033,20 +8008,6 @@ snapshots:
       sonic-boom: 4.2.0
 
   pino-std-serializers@7.0.0: {}
-
-  pino@9.7.0:
-    dependencies:
-      atomic-sleep: 1.0.0
-      fast-redact: 3.5.0
-      on-exit-leak-free: 2.1.2
-      pino-abstract-transport: 2.0.0
-      pino-std-serializers: 7.0.0
-      process-warning: 5.0.0
-      quick-format-unescaped: 4.0.4
-      real-require: 0.2.0
-      safe-stable-stringify: 2.5.0
-      sonic-boom: 4.2.0
-      thread-stream: 3.1.0
 
   pino@9.9.4:
     dependencies:
