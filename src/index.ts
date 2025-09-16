@@ -8,6 +8,7 @@ import fastifyLogto from '@albirex/fastify-logto';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
 import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
+export { fastifyLogto } from '@albirex/fastify-logto';
 
 const PLT_ADMIN_ROLE = 'platformatic-admin'
 
@@ -39,7 +40,7 @@ export type PlatformaticLogtoAuthOptions = {
     jwtPlugin: FastifyUserPluginOptions
 };
 
-const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) => {
+export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = fp(async (app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) => {
     app.register(fastifyLogto, {
         endpoint: opts.logtoBaseUrl || 'https://auth.example.com',
         appId: opts.logtoAppId || 'your-app-id',
@@ -404,7 +405,7 @@ const auth: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = async (app: Fasti
             })
         }
     })
-}
+}, { name: '@albirex/platformatic-logto' });
 
 async function fromRuleToWhere(ctx: PlatformaticContext, rule, where, user) {
     if (!rule) {
@@ -519,4 +520,4 @@ function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
     }
 }
 
-export default fp(auth, { name: '@albirex/platformatic-logto' })
+export default platformaticLogto;
