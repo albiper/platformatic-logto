@@ -202,7 +202,7 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
             // We replace just the role in `request.user`, all the rest is untouched
             this.user = {
                 // ...request.user,
-                [roleKey]: PLT_ADMIN_ROLE,
+                [roleKey]: this.headers['x-platformatic-role'] ?? PLT_ADMIN_ROLE
             }
         }
     }
