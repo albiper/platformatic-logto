@@ -278,6 +278,7 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
                     find: true,
                     save: true,
                     delete: true,
+                    updateMany: true
                 })
             }
 
