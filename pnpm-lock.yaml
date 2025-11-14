@@ -32,10 +32,10 @@ importers:
         specifier: ^3.0.0
         version: 3.20.0(typescript@5.5.4)
       '@platformatic/db-authorization':
-        specifier: ^3.20.0
+        specifier: ^3.0.0
         version: 3.20.0
       '@platformatic/sql-mapper':
-        specifier: ^3.20.0
+        specifier: ^3.0.0
         version: 3.20.0(typescript@5.5.4)
       '@sinclair/typebox':
         specifier: ^0.34.14
@@ -63,7 +63,7 @@ importers:
         specifier: ^9.12.0
         version: 9.27.0
       '@platformatic/db-core':
-        specifier: ^3.20.0
+        specifier: ^3.0.0
         version: 3.20.0(typescript@5.5.4)
       '@types/node':
         specifier: ^22.10.1
@@ -1814,9 +1814,6 @@ packages:
   encoding@0.1.13:
     resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
 
-  end-of-stream@1.4.4:
-    resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
-
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
 
@@ -3116,9 +3113,6 @@ packages:
     resolution: {integrity: sha512-mRUWCc3KUU4w1jU8sGxICXH/gNS94DvI1gxqDvBzhj1JpcsimQkYiOJfwsPUykUI5ZaspFbSgmBLER8IrQ3tqw==}
     engines: {node: '>=12.0.0'}
 
-  pump@3.0.2:
-    resolution: {integrity: sha512-tUPXtzlGM8FE3P0ZL6DVs/3P58k9nk8/jZeQCurTJylQA8qFYzHFfhBJkuqyE0FifOsQ0uKWekiZ5g8wtr28cw==}
-
   pump@3.0.3:
     resolution: {integrity: sha512-todwxLMY7/heScKmntwQG8CXVkWUOdYxIvY2s0VWAAMh/nd8SoYiRaKjlr7+iCs984f2P8zvrfWcDDYVb73NfA==}
 
@@ -4126,7 +4120,7 @@ snapshots:
   '@fastify/cookie@11.0.2':
     dependencies:
       cookie: 1.0.2
-      fastify-plugin: 5.0.1
+      fastify-plugin: 5.1.0
 
   '@fastify/cors@10.1.0':
     dependencies:
@@ -4148,7 +4142,7 @@ snapshots:
       '@fastify/error': 4.1.0
       '@lukeed/ms': 2.0.2
       fast-jwt: 5.0.6
-      fastify-plugin: 5.0.1
+      fastify-plugin: 5.1.0
       steed: 1.1.3
 
   '@fastify/merge-json-schemas@0.1.1':
@@ -6037,10 +6031,6 @@ snapshots:
       iconv-lite: 0.6.3
     optional: true
 
-  end-of-stream@1.4.4:
-    dependencies:
-      once: 1.4.0
-
   end-of-stream@1.4.5:
     dependencies:
       once: 1.4.0
@@ -7392,7 +7382,7 @@ snapshots:
       mkdirp-classic: 0.5.3
       napi-build-utils: 2.0.0
       node-abi: 3.75.0
-      pump: 3.0.2
+      pump: 3.0.3
       rc: 1.2.8
       simple-get: 4.0.1
       tar-fs: 2.1.3
@@ -7450,11 +7440,6 @@ snapshots:
       '@protobufjs/utf8': 1.1.0
       '@types/node': 22.15.21
       long: 5.3.2
-
-  pump@3.0.2:
-    dependencies:
-      end-of-stream: 1.4.4
-      once: 1.4.0
 
   pump@3.0.3:
     dependencies:
@@ -7901,13 +7886,13 @@ snapshots:
     dependencies:
       chownr: 1.1.4
       mkdirp-classic: 0.5.3
-      pump: 3.0.2
+      pump: 3.0.3
       tar-stream: 2.2.0
 
   tar-stream@2.2.0:
     dependencies:
       bl: 4.1.0
-      end-of-stream: 1.4.4
+      end-of-stream: 1.4.5
       fs-constants: 1.0.0
       inherits: 2.0.4
       readable-stream: 3.6.2
