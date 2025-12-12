@@ -43,6 +43,10 @@ export type PlatformaticLogtoAuthOptions = {
 };
 
 export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = fp(async (app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) => {
+    app.decorate('platformaticLogTo', {
+        opts
+    })
+
     app.register(fastifyLogto, {
         endpoint: opts.logtoBaseUrl || 'https://auth.example.com',
         appId: opts.logtoAppId || 'your-app-id',
@@ -526,3 +530,11 @@ function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
 }
 
 export default platformaticLogto;
+
+declare module 'fastify' {
+    interface FastifyInstance {
+        platformaticLogTo: {
+            opts: PlatformaticLogtoAuthOptions
+        }
+    }
+}
