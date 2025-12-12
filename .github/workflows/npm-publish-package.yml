@@ -30,6 +30,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
+      id-token: write  # Required for OIDC
       contents: read
       packages: write
     steps:
