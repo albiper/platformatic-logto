@@ -8,6 +8,9 @@ on:
   release:
     types: [created]
 
+permissions: 
+  id-token: write  # Required for OIDC
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -43,32 +46,32 @@ jobs:
       - run: pnpm publish --no-git-checks
         env:
           NPM_TOKEN: ${{secrets.NPM_ACCESS_TOKEN}}
-  publish-gpr:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 10.10.0
-      - uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version: 20
-          registry-url: https://npm.pkg.github.com/
-      - run: 'sed -i -E "s/\"name\": \"@albirex/\"name\": \"@albiper/g" package.json'
-      - run: pnpm i
-      - name: Configure .npmrc for GitHub Packages
-        run: |
-          echo "@albiper:registry=https://npm.pkg.github.com/" > ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_TOKEN }}" >> ~/.npmrc
-      - name: Check npm auth
-        run: npm whoami --registry=https://npm.pkg.github.com/
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      - run: pnpm publish --no-git-checks
-        env:
-          GH_TOKEN: ${{secrets.GH_TOKEN}}
+  # publish-gpr:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     packages: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: pnpm/action-setup@v2
+  #       with:
+  #         version: 10.10.0
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         cache: pnpm
+  #         node-version: 20
+  #         registry-url: https://npm.pkg.github.com/
+  #     - run: 'sed -i -E "s/\"name\": \"@albirex/\"name\": \"@albiper/g" package.json'
+  #     - run: pnpm i
+  #     - name: Configure .npmrc for GitHub Packages
+  #       run: |
+  #         echo "@albiper:registry=https://npm.pkg.github.com/" > ~/.npmrc
+  #         echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_TOKEN }}" >> ~/.npmrc
+  #     - name: Check npm auth
+  #       run: npm whoami --registry=https://npm.pkg.github.com/
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #     - run: pnpm publish --no-git-checks
+  #       env:
+  #         GH_TOKEN: ${{secrets.GH_TOKEN}}
