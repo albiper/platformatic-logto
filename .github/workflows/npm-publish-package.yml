@@ -44,8 +44,8 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: pnpm i
       - run: pnpm publish --no-git-checks
-        env:
-          NPM_TOKEN: ${{secrets.NPM_ACCESS_TOKEN}}
+        # env:
+        #   NPM_TOKEN: ${{secrets.NPM_ACCESS_TOKEN}}
   # publish-gpr:
   #   needs: build
   #   runs-on: ubuntu-latest
