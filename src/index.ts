@@ -530,11 +530,3 @@ function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
 }
 
 export default platformaticLogto;
-
-declare module 'fastify' {
-    interface FastifyInstance {
-        platformaticLogTo: {
-            opts: PlatformaticLogtoAuthOptions
-        }
-    }
-}
