@@ -212,6 +212,8 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
     app.addHook('onReady', async function () {
         const rules = await composeLogToRules();
 
+        app.platformatic.rules = rules;
+
         // TODO validate that there is at most a rule for a given role
         const entityRules = {};
         for (let i = 0; i < rules.length; i++) {

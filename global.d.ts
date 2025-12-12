@@ -2,9 +2,12 @@ import { LogToFastifyInstance } from '@albirex/fastify-logto';
 import type { Entities } from '@platformatic/db'
 import { SQLMapperPluginInterface } from '@platformatic/sql-mapper';
 import { AddAuthStrategyDecorator, CreateJWTSessionDecorator, CreateSessionDecorator, CreateWebhookSessionDecorator, ExtractUserDecorator } from 'fastify-user';
+import { PlatformaticRule } from './src/index.ts';
 declare module 'fastify' {
   interface FastifyInstance {
-    platformatic: SQLMapperPluginInterface<Entities>;
+    platformatic: SQLMapperPluginInterface<Entities> & {
+      rules?: PlatformaticRule[]
+    };
     logto: LogToFastifyInstance;
     addAuthStrategy: AddAuthStrategyDecorator
   }
