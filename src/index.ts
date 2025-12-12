@@ -10,6 +10,7 @@ import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
 export { fastifyLogto } from '@albirex/fastify-logto';
 
 import { getRequestFromContext, getRoles } from './utils/utils.js'
+export { getRequestFromContext, getRoles } from './utils/utils.js'
 
 const PLT_ADMIN_ROLE = 'platformatic-admin'
 
@@ -449,7 +450,7 @@ async function fromRuleToWhere(ctx: PlatformaticContext, rule, where, user) {
     return where
 }
 
-async function findRuleForRequestUser(ctx: PlatformaticContext, rules: PlatformaticRule[], roleKey: string, anonymousRole: string, isRolePath = false) {
+export async function findRuleForRequestUser(ctx: PlatformaticContext, rules: PlatformaticRule[], roleKey: string, anonymousRole: string, isRolePath = false) {
     const request = getRequestFromContext(ctx)
     await request.setupDBAuthorizationUser()
     const roles = getRoles(request, roleKey, anonymousRole, isRolePath)
@@ -462,7 +463,7 @@ async function findRuleForRequestUser(ctx: PlatformaticContext, rules: Platforma
     return rule
 }
 
-function checkFieldsFromRule(rule, fields) {
+export function checkFieldsFromRule(rule, fields) {
     if (!rule) {
         throw new Unauthorized()
     }
