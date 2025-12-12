@@ -3,10 +3,10 @@ import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
 import { Unauthorized, UnauthorizedField, MissingNotNullableError } from './utils/errors.js'
-import fastifyLogto from '@albirex/fastify-logto';
+import fastifyLogto, { LogToFastifyInstance } from '@albirex/fastify-logto';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
-import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
+import type { Entities, Entity, PlatformaticContext, SQLMapperPluginInterface } from '@platformatic/sql-mapper'
 export { fastifyLogto } from '@albirex/fastify-logto';
 
 import { getRequestFromContext, getRoles } from './utils/utils.js'
@@ -530,3 +530,14 @@ function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
 }
 
 export default platformaticLogto;
+
+declare module 'fastify' {
+    interface FastifyInstance {
+        platformaticLogTo: {
+            opts: PlatformaticLogtoAuthOptions
+        },
+        platformatic: SQLMapperPluginInterface<Entities> & {
+            rules?: PlatformaticRule[]
+        };
+    }
+}

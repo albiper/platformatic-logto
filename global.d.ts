@@ -5,12 +5,6 @@ import { AddAuthStrategyDecorator, CreateJWTSessionDecorator, CreateSessionDecor
 import { PlatformaticLogtoAuthOptions, PlatformaticRule } from './src/index.ts';
 declare module 'fastify' {
   interface FastifyInstance {
-    platformaticLogTo: {
-      opts: PlatformaticLogtoAuthOptions
-    },
-    platformatic: SQLMapperPluginInterface<Entities> & {
-      rules?: PlatformaticRule[]
-    };
     logto: LogToFastifyInstance;
     addAuthStrategy: AddAuthStrategyDecorator
   }
