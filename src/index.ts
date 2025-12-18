@@ -3,7 +3,7 @@ import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
 import { Unauthorized, UnauthorizedField, MissingNotNullableError } from './utils/errors.js'
-import fastifyLogto, { LogToFastifyInstance } from '@albirex/fastify-logto';
+import fastifyLogto from '@albirex/fastify-logto';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
 import type { Entities, Entity, PlatformaticContext, SQLMapperPluginInterface } from '@platformatic/sql-mapper'
@@ -23,7 +23,7 @@ export type PlatformaticRule = {
     find?: boolean;
     save?: boolean;
     delete?: boolean;
-
+    [action: string]: unknown;
 };
 
 export type PlatformaticLogtoAuthOptions = {
