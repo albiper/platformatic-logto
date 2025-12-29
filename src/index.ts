@@ -6,7 +6,7 @@ import { Unauthorized, UnauthorizedField, MissingNotNullableError } from './util
 import fastifyLogto from '@albirex/fastify-logto';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
-import type { Entities, Entity, PlatformaticContext, SQLMapperPluginInterface } from '@platformatic/sql-mapper'
+import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
 export { fastifyLogto } from '@albirex/fastify-logto';
 
 import { getRequestFromContext, getRoles } from './utils/utils.js'
@@ -214,14 +214,14 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
     }
 
     app.addHook('onReady', async function () {
-        const rules = await composeLogToRules();
+        const logToRules = await composeLogToRules();
 
-        app.platformatic.rules = rules;
+        app.platformaticLogTo.rules = logToRules;
 
         // TODO validate that there is at most a rule for a given role
         const entityRules = {};
-        for (let i = 0; i < rules.length; i++) {
-            const rule = rules[i]
+        for (let i = 0; i < logToRules.length; i++) {
+            const rule = logToRules[i]
 
             let ruleEntities = null
             if (rule.entity) {
@@ -534,10 +534,8 @@ export default platformaticLogto;
 declare module 'fastify' {
     interface FastifyInstance {
         platformaticLogTo: {
-            opts: PlatformaticLogtoAuthOptions
-        },
-        platformatic: SQLMapperPluginInterface<Entities> & {
+            opts: PlatformaticLogtoAuthOptions,
             rules?: PlatformaticRule[]
-        };
+        }
     }
 }
