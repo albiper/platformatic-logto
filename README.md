@@ -17,6 +17,9 @@ Based on [@platformatic/db-authorization](https://github.com/platformatic/platfo
 - Customizable Hooks: Extend and customize authentication flows to fit your application's needs.
 - TypeScript Support: Written in TypeScript for type safety and improved developer experience.
 
+## Compatibility 
+  For Platformatic 2.x use version < 3.x<br />
+  For Platformatic 3.x use version 3.x
 ## Installation
 To install the package, use your preferred package manager:
 

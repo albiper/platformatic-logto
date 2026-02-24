@@ -2,14 +2,17 @@ import fp from 'fastify-plugin'
 import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
-import { Unauthorized, UnauthorizedField, MissingNotNullableError } from './utils/errors.js'
+import { getRequestFromContext, getRoles } from './utils/utils.js'
+import { Unauthorized, UnauthorizedField, MissingNotNullableError, PermissionsOutdated } from './utils/errors.js'
 import fastifyLogto from '@albirex/fastify-logto';
+import fastifyRedis from '@fastify/redis';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
 import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
-export { fastifyLogto } from '@albirex/fastify-logto';
 
-import { getRequestFromContext, getRoles } from './utils/utils.js'
+export { fastifyLogto } from '@albirex/fastify-logto';
+export { incrementPermissionsVersion, deletePermissionsVersion } from './utils/permissions-version.js';
+
 export { getRequestFromContext, getRoles } from './utils/utils.js'
 
 const PLT_ADMIN_ROLE = 'platformatic-admin'
@@ -26,6 +29,14 @@ export type PlatformaticRule = {
     [action: string]: unknown;
 };
 
+export type RedisConfig = {
+    host?: string;
+    port?: number;
+    password?: string;
+    username?: string;
+    db?: number;
+};
+
 export type PlatformaticLogtoAuthOptions = {
     logtoBaseUrl?: string;
     logtoAppId?: string;
@@ -39,13 +50,28 @@ export type PlatformaticLogtoAuthOptions = {
     allowAnonymous?: boolean;
     checks?: boolean;
     defaults?: boolean;
-    jwtPlugin: FastifyUserPluginOptions
+    jwtPlugin: FastifyUserPluginOptions;
+    redis?: RedisConfig;
+    enableTokenVersionCheck?: boolean;
+    sessionVersionKey?: string;
 };
 
 export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions> = fp(async (app: FastifyInstance, opts: PlatformaticLogtoAuthOptions) => {
     app.decorate('platformaticLogTo', {
         opts
     })
+
+    // Register Redis if configured
+    if (opts.redis) {
+        await app.register(fastifyRedis, {
+            host: opts.redis.host || '127.0.0.1',
+            port: opts.redis.port || 6379,
+            password: opts.redis.password,
+            username: opts.redis.username,
+            db: opts.redis.db || 0,
+        });
+        app.log.info('Redis client registered for permissions version check');
+    }
 
     app.register(fastifyLogto, {
         endpoint: opts.logtoBaseUrl || 'https://auth.example.com',
@@ -202,6 +228,8 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
                     },
                 })
             }
+        } else {
+            await checkPermissionsVersion(app, opts, this)
         }
 
         if (forceAdminRole) {
@@ -526,6 +554,51 @@ function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
                 }
             }
         }
+    }
+}
+
+/**
+ * Check the permissions version
+ * @throws PermissionsOutdated if versions don't match
+ */
+async function checkPermissionsVersion(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions, user = null) {
+
+    if (!opts.enableTokenVersionCheck || !opts.redis || !app.redis || !user) {
+            return;
+    }
+
+    const sessionVersionKey = opts.sessionVersionKey || 'version'
+    const tokenVersion = user?.[sessionVersionKey];
+    const userId = user?.sub;
+
+    try {
+        const redisKey = `permissions:version:${userId}`;
+        const currentVersionStr = await app.redis.get(redisKey);
+
+        if (currentVersionStr === null) {
+            await app.redis.set(redisKey, tokenVersion.toString());
+            this.log.debug({ userId, version: tokenVersion }, 'Initialized permissions version in Redis');
+            return;
+        }
+
+        const currentVersion = parseInt(currentVersionStr, 10);
+
+        // Compare versions
+        if (currentVersion !== tokenVersion) {
+            this.log.warn({
+                userId,
+                tokenVersion,
+                currentVersion
+            }, 'Permissions version mismatch detected');
+            throw new PermissionsOutdated();
+        }
+
+        this.log.trace({ userId, version: tokenVersion }, 'Token version check passed');
+    } catch (error) {
+        if (error.name === 'FastifyError' && error.code === 'PLT_DB_AUTH_VERSION_OUTDATED') {
+            throw error;
+        }
+        this.log.error({ err: error, userId }, 'Error checking token version');
     }
 }
 
