@@ -577,7 +577,7 @@ async function checkPermissionsVersion(app: FastifyInstance, opts: PlatformaticL
 
         if (currentVersionStr === null) {
             await app.redis.set(redisKey, tokenVersion.toString());
-            this.log.debug({ userId, version: tokenVersion }, 'Initialized permissions version in Redis');
+            app.log.debug({ userId, version: tokenVersion }, 'Initialized permissions version in Redis');
             return;
         }
 
@@ -585,7 +585,7 @@ async function checkPermissionsVersion(app: FastifyInstance, opts: PlatformaticL
 
         // Compare versions
         if (currentVersion !== tokenVersion) {
-            this.log.warn({
+            app.log.warn({
                 userId,
                 tokenVersion,
                 currentVersion
@@ -593,12 +593,12 @@ async function checkPermissionsVersion(app: FastifyInstance, opts: PlatformaticL
             throw new PermissionsOutdated();
         }
 
-        this.log.trace({ userId, version: tokenVersion }, 'Token version check passed');
+        app.log.trace({ userId, version: tokenVersion }, 'Token version check passed');
     } catch (error) {
         if (error.name === 'FastifyError' && error.code === 'PLT_DB_AUTH_VERSION_OUTDATED') {
             throw error;
         }
-        this.log.error({ err: error, userId }, 'Error checking token version');
+        app.log.error({ err: error, userId }, 'Error checking token version');
     }
 }
 
