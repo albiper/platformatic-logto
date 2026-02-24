@@ -229,7 +229,7 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
                 })
             }
         } else {
-            await checkPermissionsVersion(app, opts, this)
+            await checkPermissionsVersion(app, opts, this.user)
         }
 
         if (forceAdminRole) {
