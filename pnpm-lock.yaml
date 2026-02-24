@@ -22,6 +22,9 @@ importers:
       '@fastify/error':
         specifier: ^4.1.0
         version: 4.1.0
+      '@fastify/redis':
+        specifier: ^7.2.0
+        version: 7.2.0
       '@logto/js':
         specifier: ^5.1.1
         version: 5.1.1(patch_hash=3dc540c8409884dfe1378d8d5034c1db39b7a47388c5661ea1313a25e01d7667)
@@ -422,6 +425,9 @@ packages:
 
   '@fastify/proxy-addr@5.0.0':
     resolution: {integrity: sha512-37qVVA1qZ5sgH7KpHkkC4z9SK6StIsIcOmpjvMPXNb3vx2GQxhZocogVYbr2PbbeLCQxYIPDok307xEvRZOzGA==}
+
+  '@fastify/redis@7.2.0':
+    resolution: {integrity: sha512-Ql8emmkajVBCCz0pRjPFZRFI2069Jrp/iufKb5TJwgBeu7B+oZp+GeZIgf+4WX3EX7Vi/h3KTyGf+5DUWI1oFw==}
 
   '@fastify/send@4.1.0':
     resolution: {integrity: sha512-TMYeQLCBSy2TOFmV95hQWkiTYgC/SEx7vMdV+wnZVX4tt8VBLKzmH8vV9OzJehV0+XBfg+WxPMt5wp+JBUKsVw==}
@@ -4157,6 +4163,13 @@ snapshots:
     dependencies:
       '@fastify/forwarded': 3.0.0
       ipaddr.js: 2.2.0
+
+  '@fastify/redis@7.2.0':
+    dependencies:
+      fastify-plugin: 5.1.0
+      ioredis: 5.7.0
+    transitivePeerDependencies:
+      - supports-color
 
   '@fastify/send@4.1.0':
     dependencies:
