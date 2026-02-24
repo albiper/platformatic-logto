@@ -2,7 +2,6 @@ import fp from 'fastify-plugin'
 import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
-import { getRequestFromContext, getRoles } from './utils/utils.js'
 import { Unauthorized, UnauthorizedField, MissingNotNullableError, PermissionsOutdated } from './utils/errors.js'
 import fastifyLogto from '@albirex/fastify-logto';
 import fastifyRedis from '@fastify/redis';
@@ -13,6 +12,7 @@ import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
 export { fastifyLogto } from '@albirex/fastify-logto';
 export { incrementPermissionsVersion, deletePermissionsVersion } from './utils/permissions-version.js';
 
+import { getRequestFromContext, getRoles } from './utils/utils.js'
 export { getRequestFromContext, getRoles } from './utils/utils.js'
 
 const PLT_ADMIN_ROLE = 'platformatic-admin'
