@@ -574,14 +574,21 @@ async function checkPermissionsVersion(app: FastifyInstance, opts: PlatformaticL
     try {
         const redisKey = `permissions:version:${userId}`;
         const currentVersionStr = await app.redis.get(redisKey);
+        const currentVersion = parseInt(currentVersionStr, 10);
 
         if (currentVersionStr === null) {
             await app.redis.set(redisKey, tokenVersion.toString());
             app.log.debug({ userId, version: tokenVersion }, 'Initialized permissions version in Redis');
+            if (tokenVersion > 1) {
+                app.log.warn({
+                    userId,
+                    tokenVersion,
+                    currentVersion
+                }, 'Permissions version mismatch detected');
+                throw new PermissionsOutdated();            
+            }
             return;
         }
-
-        const currentVersion = parseInt(currentVersionStr, 10);
 
         // Compare versions
         if (currentVersion !== tokenVersion) {
