@@ -16,6 +16,7 @@ import { getRequestFromContext, getRoles, getScopes } from './utils/utils.js'
 export { getRequestFromContext, getRoles } from './utils/utils.js'
 
 const PLT_ADMIN_ROLE = 'platformatic-admin'
+const PLT_ADMIN_SCOPES = '*'
 
 export type EntityActions = 'find' | 'save' | 'insert' | 'updateMany' | 'delete';
 
@@ -96,6 +97,7 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
     await app.register(fastifyUser as unknown as FastifyPluginAsync, opts.jwtPlugin);
 
     const roleKey = opts.roleBasedAuth?.rolePath || opts.roleBasedAuth?.roleKey || 'X-PLATFORMATIC-ROLE';
+    const scopesKey = opts.scopeBasedAuth.scopesPath || opts.scopeBasedAuth.scopesKey || 'X-PLATFORMATIC-SCOPES'
     const adminSecret = opts.adminSecret
     const isRolePath = !!opts.roleBasedAuth?.rolePath // if `true` the role is intepreted as path like `user.role`
     const anonymousRole = opts.anonymousRole || 'anonymous'
@@ -136,9 +138,18 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
 
         if (forceAdminRole) {
             // We replace just the role in `request.user`, all the rest is untouched
-            this.user = {
-                // ...request.user,
-                [roleKey]: this.headers['x-platformatic-role'] ? [this.headers['x-platformatic-role']] : [PLT_ADMIN_ROLE]
+            if (opts.roleBasedAuth) {
+                this.user = {
+                    // ...request.user,
+                    [roleKey]: this.headers['x-platformatic-role'] ? [this.headers['x-platformatic-role']] : [PLT_ADMIN_ROLE]
+                }
+            }
+
+            if (opts.scopeBasedAuth) {
+                this.user = {
+                    // ...request.user,
+                    [scopesKey]: this.headers['x-platformatic-scopes'] ? [this.headers['x-platformatic-scopes']] : [PLT_ADMIN_SCOPES]
+                }
             }
         }
     }
@@ -437,7 +448,6 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
     }
 
     async function scopeBasedAuth() {
-        const scopesKey = opts.scopeBasedAuth.scopesPath || opts.scopeBasedAuth.scopesKey || 'X-PLATFORMATIC-SCOPES'
         for (const entityKey of Object.keys(app.platformatic.entities)) {
             // const type = app.platformatic.entities[entityKey]
 
@@ -628,6 +638,10 @@ export async function findScopeForRequestUser(ctx: PlatformaticContext, entityKe
     await request.setupDBAuthorizationUser()
     const scopes = getScopes(request, scopesKey, anonymousRole, isScopePath)
     const scope = scopes.find(s => {
+        if (s === PLT_ADMIN_SCOPES) {
+            return true;
+        }
+
         if (action !== 'find') {
             return s === `${action}:${entityKey}`
         }
@@ -641,7 +655,6 @@ export async function findScopeForRequestUser(ctx: PlatformaticContext, entityKe
         throw new Unauthorized()
     }
     ctx.reply.request.log.trace({ scopes, scope }, 'found scope')
-    return scope
 }
 
 export function checkFieldsFromRule(rule, fields) {
