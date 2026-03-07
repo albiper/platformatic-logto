@@ -12,10 +12,12 @@ import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
 export { fastifyLogto } from '@albirex/fastify-logto';
 export { incrementPermissionsVersion, deletePermissionsVersion } from './utils/permissions-version.js';
 
-import { getRequestFromContext, getRoles } from './utils/utils.js'
+import { getRequestFromContext, getRoles, getScopes } from './utils/utils.js'
 export { getRequestFromContext, getRoles } from './utils/utils.js'
 
 const PLT_ADMIN_ROLE = 'platformatic-admin'
+
+export type EntityActions = 'find' | 'save' | 'insert' | 'updateMany' | 'delete';
 
 export type PlatformaticRule = {
     role: string;
@@ -37,19 +39,29 @@ export type RedisConfig = {
     db?: number;
 };
 
-export type PlatformaticLogtoAuthOptions = {
+export type PlatformaticLogToRoleBasedAuthOptions = {
     logtoBaseUrl?: string;
     logtoAppId?: string;
     logtoAppSecret?: string;
-    adminSecret?: string;
     rolePath?: string;
     roleKey?: string;
     userPath?: string;
     userKey?: string;
-    anonymousRole?: string;
-    allowAnonymous?: boolean;
+}
+
+export type PlatformaticLogToScopeBasedAuthOptions = {
+    scopesPath?: string;
+    scopesKey?: string;
+}
+
+export type PlatformaticLogtoAuthOptions = {
+    adminSecret?: string;
+    roleBasedAuth?: PlatformaticLogToRoleBasedAuthOptions,
+    scopeBasedAuth?: PlatformaticLogToScopeBasedAuthOptions,
     checks?: boolean;
     defaults?: boolean;
+    anonymousRole?: string;
+    allowAnonymous?: boolean;
     jwtPlugin: FastifyUserPluginOptions;
     redis?: RedisConfig;
     enableTokenVersionCheck?: boolean;
@@ -73,130 +85,20 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
         app.log.info('Redis client registered for permissions version check');
     }
 
-    app.register(fastifyLogto, {
-        endpoint: opts.logtoBaseUrl || 'https://auth.example.com',
-        appId: opts.logtoAppId || 'your-app-id',
-        appSecret: opts.logtoAppSecret || 'your-app-secret',
-    });
+    if (opts.roleBasedAuth) {
+        app.register(fastifyLogto, {
+            endpoint: opts.roleBasedAuth.logtoBaseUrl || 'https://auth.example.com',
+            appId: opts.roleBasedAuth.logtoAppId || 'your-app-id',
+            appSecret: opts.roleBasedAuth.logtoAppSecret || 'your-app-secret',
+        });
+    }
 
     await app.register(fastifyUser as unknown as FastifyPluginAsync, opts.jwtPlugin);
 
+    const roleKey = opts.roleBasedAuth?.rolePath || opts.roleBasedAuth?.roleKey || 'X-PLATFORMATIC-ROLE';
     const adminSecret = opts.adminSecret
-    const roleKey = opts.rolePath || opts.roleKey || 'X-PLATFORMATIC-ROLE'
-    const userKey = opts.userPath || opts.userKey || 'X-PLATFORMATIC-USER-ID'
-    const isRolePath = !!opts.rolePath // if `true` the role is intepreted as path like `user.role`
+    const isRolePath = !!opts.roleBasedAuth?.rolePath // if `true` the role is intepreted as path like `user.role`
     const anonymousRole = opts.anonymousRole || 'anonymous'
-
-    async function composeLogToRules() {
-        const rolesResp = await app.logto.callAPI('/api/roles?type=User', 'GET');
-
-        if (!rolesResp.ok) {
-            throw rolesResp;
-        }
-
-        const roles = await rolesResp.json();
-        const rules: PlatformaticRule[] = [{
-            role: anonymousRole,
-            entities: Object.keys(app.platformatic.entities),
-            find: opts.allowAnonymous,
-            save: opts.allowAnonymous,
-            delete: opts.allowAnonymous,
-        }];
-
-        for (const role of roles) {
-            const scopesResp = await app.logto.callAPI(`/api/roles/${role.id}/scopes`, 'GET');
-
-            if (!scopesResp.ok) {
-                throw scopesResp;
-            }
-
-            const scopes = await scopesResp.json();
-
-            for (const scope of scopes) {
-                const roleName = role.name;
-                // eslint-disable-next-line prefer-const
-                let [scopeAction, entity] = scope.name.split(':');
-
-                if (!app.platformatic.entities[entity]) {
-                    app.log.debug(`Unknown entity '${entity}' in authorization rule`)
-                    continue;
-                }
-
-                switch (scopeAction) {
-                    case 'create':
-                        scopeAction = 'save'
-                        break;
-                    case 'read':
-                        scopeAction = 'find'
-                        break;
-                    case 'update':
-                        scopeAction = 'updateMany'
-                        break;
-                }
-
-                const checkExists = rules.find(r => r.role === roleName && r.entity === entity);
-                if (checkExists) {
-                    if (opts.checks) {
-                        checkExists[scopeAction] = {
-                            checks: {
-                                userId: userKey
-                            }
-                        };
-                    } else {
-                        checkExists[scopeAction] = true;
-                    }
-                } else {
-                    const newRule: PlatformaticRule = {
-                        role: roleName,
-                        entity,
-                    };
-
-                    if (opts.checks) {
-                        newRule[scopeAction] = {
-                            checks: {
-                                userId: userKey
-                            }
-                        };
-                    } else {
-                        newRule[scopeAction] = true;
-                    }
-
-                    if (opts.defaults) {
-                        newRule.defaults = {
-                            userId: userKey
-                        };
-                    }
-
-                    rules.push(newRule);
-                }
-            }
-        }
-
-        const logRules = rules.reduce((prev, curr) => {
-            (prev[curr['role']] ??= []).push(curr);
-            return prev;
-        }, {})
-
-        for (const key in logRules) {
-            app.log.info(`Rules set for role ${key}`);
-
-            for (const element of logRules[key]) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { entity, entities, role, ...other } = element;
-                app.log.info(`\t${entity ?? entities.join(',')}: ${JSON.stringify(other)}`);
-            }
-        }
-
-        const missingEntities = Object.keys(app.platformatic.entities).filter((e) => !rules.map((r) => r.entity).includes(e));
-
-        if (missingEntities.length) {
-            app.log.warn(`Missing rules for entities: ${missingEntities.join(', ')}`);
-        }
-
-        app.log.debug('LogTo calculated rules');
-        app.log.debug(rules);
-        return rules;
-    }
 
     app.decorateRequest('setupDBAuthorizationUser', setupUser)
 
@@ -241,7 +143,120 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
         }
     }
 
-    app.addHook('onReady', async function () {
+    async function roleBasedAuth() {
+        const userKey = opts.roleBasedAuth.userKey || opts.roleBasedAuth.userPath || 'X-PLATFORMATIC-USER-ID';
+
+        async function composeLogToRules() {
+            const rolesResp = await app.logto.callAPI('/api/roles?type=User', 'GET');
+
+            if (!rolesResp.ok) {
+                throw rolesResp;
+            }
+
+            const roles = await rolesResp.json();
+            const rules: PlatformaticRule[] = [{
+                role: anonymousRole,
+                entities: Object.keys(app.platformatic.entities),
+                find: opts.allowAnonymous,
+                save: opts.allowAnonymous,
+                delete: opts.allowAnonymous,
+            }];
+
+            for (const role of roles) {
+                const scopesResp = await app.logto.callAPI(`/api/roles/${role.id}/scopes`, 'GET');
+
+                if (!scopesResp.ok) {
+                    throw scopesResp;
+                }
+
+                const scopes = await scopesResp.json();
+
+                for (const scope of scopes) {
+                    const roleName = role.name;
+                    // eslint-disable-next-line prefer-const
+                    let [scopeAction, entity] = scope.name.split(':');
+
+                    if (!app.platformatic.entities[entity]) {
+                        app.log.debug(`Unknown entity '${entity}' in authorization rule`)
+                        continue;
+                    }
+
+                    switch (scopeAction) {
+                        case 'create':
+                            scopeAction = 'save'
+                            break;
+                        case 'read':
+                            scopeAction = 'find'
+                            break;
+                        case 'update':
+                            scopeAction = 'updateMany'
+                            break;
+                    }
+
+                    const checkExists = rules.find(r => r.role === roleName && r.entity === entity);
+                    if (checkExists) {
+                        if (opts.checks) {
+                            checkExists[scopeAction] = {
+                                checks: {
+                                    userId: userKey
+                                }
+                            };
+                        } else {
+                            checkExists[scopeAction] = true;
+                        }
+                    } else {
+                        const newRule: PlatformaticRule = {
+                            role: roleName,
+                            entity,
+                        };
+
+                        if (opts.checks) {
+                            newRule[scopeAction] = {
+                                checks: {
+                                    userId: userKey
+                                }
+                            };
+                        } else {
+                            newRule[scopeAction] = true;
+                        }
+
+                        if (opts.defaults) {
+                            newRule.defaults = {
+                                userId: userKey
+                            };
+                        }
+
+                        rules.push(newRule);
+                    }
+                }
+            }
+
+            const logRules = rules.reduce((prev, curr) => {
+                (prev[curr['role']] ??= []).push(curr);
+                return prev;
+            }, {})
+
+            for (const key in logRules) {
+                app.log.info(`Rules set for role ${key}`);
+
+                for (const element of logRules[key]) {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { entity, entities, role, ...other } = element;
+                    app.log.info(`\t${entity ?? entities.join(',')}: ${JSON.stringify(other)}`);
+                }
+            }
+
+            const missingEntities = Object.keys(app.platformatic.entities).filter((e) => !rules.map((r) => r.entity).includes(e));
+
+            if (missingEntities.length) {
+                app.log.warn(`Missing rules for entities: ${missingEntities.join(', ')}`);
+            }
+
+            app.log.debug('LogTo calculated rules');
+            app.log.debug(rules);
+            return rules;
+        }
+
         const logToRules = await composeLogToRules();
 
         app.platformaticLogTo.rules = logToRules;
@@ -280,28 +295,6 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
             // We have subscriptions!
             let userPropToFillForPublish
             const topicsWithoutChecks = false
-
-            // mqtt
-            // if (app.platformatic.mq) {
-            //     for (const rule of rules) {
-            //         const checks = rule.find?.checks
-            //         if (typeof checks !== 'object') {
-            //             topicsWithoutChecks = !!rule.find
-            //             continue
-            //         }
-            //         const keys = Object.keys(checks)
-            //         if (keys.length !== 1) {
-            //             throw new Error(`Subscription requires that the role "${rule.role}" has only one check in the find rule for entity "${rule.entity}"`)
-            //         }
-            //         const key = keys[0]
-
-            //         const val = typeof checks[key] === 'object' ? checks[key].eq : checks[key]
-            //         if (userPropToFillForPublish && userPropToFillForPublish.val !== val) {
-            //             throw new Error('Unable to configure subscriptions and authorization due to multiple check clauses in find')
-            //         }
-            //         userPropToFillForPublish = { key, val }
-            //     }
-            // }
 
             if (userPropToFillForPublish && topicsWithoutChecks) {
                 throw new Error(`Subscription for entity "${entityKey}" have conflictling rules across roles`)
@@ -441,6 +434,139 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
                 },
             })
         }
+    }
+
+    async function scopeBasedAuth() {
+        const scopesKey = opts.scopeBasedAuth.scopesPath || opts.scopeBasedAuth.scopesKey || 'X-PLATFORMATIC-SCOPES'
+        for (const entityKey of Object.keys(app.platformatic.entities)) {
+            // const type = app.platformatic.entities[entityKey]
+
+            // We have subscriptions!
+            let userPropToFillForPublish
+            const topicsWithoutChecks = false
+
+            if (userPropToFillForPublish && topicsWithoutChecks) {
+                throw new Error(`Subscription for entity "${entityKey}" have conflictling rules across roles`)
+            }
+
+            function useOriginal(ctx: PlatformaticContext) {
+                return !ctx
+            }
+
+            app.platformatic.addEntityHooks(entityKey, {
+                async find(originalFind, { where, ctx, fields, ...restOpts } = {}) {
+                    if (useOriginal(ctx)) {
+                        return originalFind({ ...restOpts, where, ctx, fields })
+                    }
+                    await findScopeForRequestUser(ctx, entityKey, 'find', scopesKey, anonymousRole, isRolePath)
+
+                    // checkFieldsFromRule(scope.find, fields || Object.keys(app.platformatic.entities[entityKey].fields))
+                    // where = await fromRuleToWhere(ctx, scope.find, where, request.user)
+
+                    return originalFind({ ...restOpts, where, ctx, fields })
+                },
+                async save(originalSave, { input, ctx, fields, ...restOpts }) {
+                    if (useOriginal(ctx)) {
+                        return originalSave({ ctx, input, fields, ...restOpts })
+                    }
+                    await findScopeForRequestUser(ctx, entityKey, 'save', scopesKey, anonymousRole, isRolePath)
+
+                    // checkFieldsFromRule(rule.save, fields)
+                    // checkInputFromRuleFields(rule.save, input)
+
+                    // if (rule.defaults) {
+                    //     for (const key of Object.keys(rule.defaults)) {
+                    //         const defaults = rule.defaults[key]
+                    //         if (typeof defaults === 'function') {
+                    //             input[key] = await defaults({ user: request.user, ctx, input })
+                    //         } else {
+                    //             input[key] = request.user[defaults]
+                    //         }
+                    //     }
+                    // }
+
+                    // const hasAllPrimaryKeys = input[type.primaryKey] !== undefined;
+                    // const whereConditions = {}
+                    // whereConditions[type.primaryKey] = { eq: input[type.primaryKey] }
+
+                    // if (hasAllPrimaryKeys) {
+                    //     const where = await fromRuleToWhere(ctx, rule.save, whereConditions, request.user)
+
+                    //     const found = await type.find({
+                    //         where,
+                    //         ctx,
+                    //         fields,
+                    //     })
+
+                    //     if (found.length === 0) {
+                    //         throw new Unauthorized()
+                    //     }
+
+                    //     return originalSave({ input, ctx, fields, ...restOpts })
+                    // }
+
+                    return originalSave({ input, ctx, fields, ...restOpts })
+                },
+
+                async insert(originalInsert, { inputs, ctx, fields, ...restOpts }) {
+                    if (useOriginal(ctx)) {
+                        return originalInsert({ inputs, ctx, fields, ...restOpts })
+                    }
+                    await findScopeForRequestUser(ctx, entityKey, 'insert', scopesKey, anonymousRole, isRolePath)
+
+                    // checkFieldsFromRule(rule.save, fields)
+                    // checkInputFromRuleFields(rule.save, inputs)
+
+                    /* istanbul ignore else */
+                    // if (rule.defaults) {
+                    //     for (const input of inputs) {
+                    //         for (const key of Object.keys(rule.defaults)) {
+                    //             const defaults = rule.defaults[key]
+                    //             if (typeof defaults === 'function') {
+                    //                 input[key] = await defaults({ user: request.user, ctx, input })
+                    //             } else {
+                    //                 input[key] = request.user[defaults]
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                    return originalInsert({ inputs, ctx, fields, ...restOpts })
+                },
+
+                async delete(originalDelete, { where, ctx, fields, ...restOpts }) {
+                    if (useOriginal(ctx)) {
+                        return originalDelete({ where, ctx, fields, ...restOpts })
+                    }
+                    await findScopeForRequestUser(ctx, entityKey, 'delete', scopesKey, anonymousRole, isRolePath)
+
+                    // where = await fromRuleToWhere(ctx, rule.delete, where, request.user)
+
+                    return originalDelete({ where, ctx, fields, ...restOpts })
+                },
+
+                async updateMany(originalUpdateMany, { where, ctx, fields, ...restOpts }) {
+                    if (useOriginal(ctx)) {
+                        return originalUpdateMany({ ...restOpts, where, ctx, fields })
+                    }
+                    await findScopeForRequestUser(ctx, entityKey, 'updateMany', scopesKey, anonymousRole, isRolePath)
+
+                    // where = await fromRuleToWhere(ctx, rule.updateMany, where, request.user)
+
+                    return originalUpdateMany({ ...restOpts, where, ctx, fields })
+                },
+            })
+        }
+    }
+
+    app.addHook('onReady', async function () {
+        if (opts.roleBasedAuth) {
+            await roleBasedAuth();
+        }
+
+        if (opts.scopeBasedAuth) {
+            await scopeBasedAuth();
+        }
     })
 }, { name: '@albirex/platformatic-logto' });
 
@@ -495,6 +621,27 @@ export async function findRuleForRequestUser(ctx: PlatformaticContext, rules: Pl
     }
     ctx.reply.request.log.trace({ roles, rule }, 'found rule')
     return rule
+}
+
+export async function findScopeForRequestUser(ctx: PlatformaticContext, entityKey: string, action: EntityActions, scopesKey: string, anonymousRole: string, isScopePath = false) {
+    const request = getRequestFromContext(ctx)
+    await request.setupDBAuthorizationUser()
+    const scopes = getScopes(request, scopesKey, anonymousRole, isScopePath)
+    const scope = scopes.find(s => {
+        if (action !== 'find') {
+            return s === `${action}:${entityKey}`
+        }
+        else {
+            return s === `${action}:${entityKey}` || s === `read:${entityKey}`
+        }
+    });
+
+    if (!scope) {
+        ctx.reply.request.log.warn('no scope found')
+        throw new Unauthorized()
+    }
+    ctx.reply.request.log.trace({ scopes, scope }, 'found scope')
+    return scope
 }
 
 export function checkFieldsFromRule(rule, fields) {
@@ -564,7 +711,7 @@ function checkSaveMandatoryFieldsInRules(type: Entity, rules) {
 async function checkPermissionsVersion(app: FastifyInstance, opts: PlatformaticLogtoAuthOptions, user = null) {
 
     if (!opts.enableTokenVersionCheck || !opts.redis || !app.redis || !user) {
-            return;
+        return;
     }
 
     const sessionVersionKey = opts.sessionVersionKey || 'version'
@@ -585,7 +732,7 @@ async function checkPermissionsVersion(app: FastifyInstance, opts: PlatformaticL
                     tokenVersion,
                     currentVersion
                 }, 'Permissions version mismatch detected');
-                throw new PermissionsOutdated();            
+                throw new PermissionsOutdated();
             }
             return;
         }
