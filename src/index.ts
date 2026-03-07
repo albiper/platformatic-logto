@@ -642,11 +642,15 @@ export async function findScopeForRequestUser(ctx: PlatformaticContext, entityKe
             return true;
         }
 
-        if (action !== 'find') {
-            return s === `${action}:${entityKey}`
-        }
-        else {
-            return s === `${action}:${entityKey}` || s === `read:${entityKey}`
+        switch (action) {
+            case 'find':
+                return s === `${action}:${entityKey}` || s === `read:${entityKey}`
+            case 'save':
+                return s === `${action}:${entityKey}` || s === `create:${entityKey}` || s === `update:${entityKey}`
+            case 'updateMany':
+                return s === `${action}:${entityKey}` || s === `update:${entityKey}`
+            default:
+                return s === `${action}:${entityKey}`
         }
     });
 
