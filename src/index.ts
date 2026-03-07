@@ -649,6 +649,8 @@ export async function findScopeForRequestUser(ctx: PlatformaticContext, entityKe
                 return s === `${action}:${entityKey}` || s === `create:${entityKey}` || s === `update:${entityKey}`
             case 'updateMany':
                 return s === `${action}:${entityKey}` || s === `update:${entityKey}`
+            case 'insert':
+                return s === `${action}:${entityKey}` || s === `create:${entityKey}`
             default:
                 return s === `${action}:${entityKey}`
         }
