@@ -3,7 +3,7 @@ import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
 import { Unauthorized, UnauthorizedField, MissingNotNullableError, PermissionsOutdated } from './utils/errors.js'
-import fastifyLogto from '@albirex/fastify-logto';
+import fastifyLogto, { LogtoFastifyConfig } from '@albirex/fastify-logto';
 import fastifyRedis from '@fastify/redis';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
@@ -59,6 +59,7 @@ export type PlatformaticLogtoAuthOptions = {
     adminSecret?: string;
     roleBasedAuth?: PlatformaticLogToRoleBasedAuthOptions,
     scopeBasedAuth?: PlatformaticLogToScopeBasedAuthOptions,
+    fastifyLogTo?: LogtoFastifyConfig;
     checks?: boolean;
     defaults?: boolean;
     anonymousRole?: string;
@@ -86,11 +87,11 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
         app.log.info('Redis client registered for permissions version check');
     }
 
-    if (opts.roleBasedAuth) {
+    if (opts.roleBasedAuth || opts.fastifyLogTo) {
         app.register(fastifyLogto, {
-            endpoint: opts.roleBasedAuth.logtoBaseUrl || 'https://auth.example.com',
-            appId: opts.roleBasedAuth.logtoAppId || 'your-app-id',
-            appSecret: opts.roleBasedAuth.logtoAppSecret || 'your-app-secret',
+            endpoint: opts.roleBasedAuth.logtoBaseUrl || opts.fastifyLogTo.endpoint || 'https://auth.example.com',
+            appId: opts.roleBasedAuth.logtoAppId || opts.fastifyLogTo.appId || 'your-app-id',
+            appSecret: opts.roleBasedAuth.logtoAppSecret || opts.fastifyLogTo.appSecret || 'your-app-secret',
         });
     }
 
