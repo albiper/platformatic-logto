@@ -89,9 +89,9 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
 
     if (opts.roleBasedAuth || opts.fastifyLogTo) {
         app.register(fastifyLogto, {
-            endpoint: opts.roleBasedAuth.logtoBaseUrl || opts.fastifyLogTo.endpoint || 'https://auth.example.com',
-            appId: opts.roleBasedAuth.logtoAppId || opts.fastifyLogTo.appId || 'your-app-id',
-            appSecret: opts.roleBasedAuth.logtoAppSecret || opts.fastifyLogTo.appSecret || 'your-app-secret',
+            endpoint: opts.roleBasedAuth?.logtoBaseUrl || opts.fastifyLogTo?.endpoint || 'https://auth.example.com',
+            appId: opts.roleBasedAuth?.logtoAppId || opts.fastifyLogTo?.appId || 'your-app-id',
+            appSecret: opts.roleBasedAuth?.logtoAppSecret || opts.fastifyLogTo?.appSecret || 'your-app-secret',
         });
     }
 
