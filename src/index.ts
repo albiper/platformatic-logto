@@ -137,6 +137,10 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
             await checkPermissionsVersion(app, opts, this.user)
         }
 
+        if (this.user.scope) {
+            this.user.scopes = this.user.scope.split(' ');
+        }
+
         if (forceAdminRole) {
             // We replace just the role in `request.user`, all the rest is untouched
             if (opts.roleBasedAuth) {
