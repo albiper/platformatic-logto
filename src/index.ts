@@ -137,7 +137,7 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
             await checkPermissionsVersion(app, opts, this.user)
         }
 
-        if (this.user.scope) {
+        if (this.user?.scope) {
             this.user.scopes = this.user.scope.split(' ');
         }
 
