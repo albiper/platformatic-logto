@@ -153,7 +153,7 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
             if (opts.scopeBasedAuth) {
                 this.user = {
                     // ...request.user,
-                    [scopesKey]: this.headers['x-platformatic-scopes'] ? [this.headers['x-platformatic-scopes']] : [PLT_ADMIN_SCOPES]
+                    [scopesKey]: this.headers['x-platformatic-scopes'] ? [this.headers['x-platformatic-scopes']] : PLT_ADMIN_SCOPES
                 }
             }
         }
