@@ -1,6 +1,6 @@
 {
   "name": "@albirex/platformatic-logto",
-  "version": "1.7.8",
+  "version": "3.0.1",
   "description": "LogTo roles and scopes integrated in Platformatic authorization",
   "type": "module",
   "main": "./lib/index.cjs",
