@@ -2,11 +2,13 @@ import fp from 'fastify-plugin'
 import * as fastifyUser from 'fastify-user'
 
 import findRule from './utils/find-rule.js'
-import { Unauthorized, UnauthorizedField, MissingNotNullableError } from './utils/errors.js'
+import { Unauthorized, UnauthorizedField, MissingNotNullableError, PermissionsOutdated } from './utils/errors.js'
 import fastifyLogto, { LogtoFastifyConfig } from '@albirex/fastify-logto';
+import fastifyRedis from '@fastify/redis';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
 import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
+
 export { fastifyLogto } from '@albirex/fastify-logto';
 export { incrementPermissionsVersion, deletePermissionsVersion } from './utils/permissions-version.js';
 
@@ -27,7 +29,15 @@ export type PlatformaticRule = {
     find?: boolean;
     save?: boolean;
     delete?: boolean;
+    [action: string]: unknown;
+};
 
+export type RedisConfig = {
+    host?: string;
+    port?: number;
+    password?: string;
+    username?: string;
+    db?: number;
 };
 
 export type PlatformaticLogToRoleBasedAuthOptions = {
