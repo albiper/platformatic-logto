@@ -1,6 +1,5 @@
 import { LogToFastifyInstance } from '@albirex/fastify-logto';
-import type { Entities } from '@platformatic/db'
-import { SQLMapperPluginInterface } from '@platformatic/sql-mapper';
+import { Entities, SQLMapperPluginInterface } from '@platformatic/sql-mapper';
 import { AddAuthStrategyDecorator, CreateJWTSessionDecorator, CreateSessionDecorator, CreateWebhookSessionDecorator, ExtractUserDecorator } from 'fastify-user';
 declare module 'fastify' {
   interface FastifyInstance {
