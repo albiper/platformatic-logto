@@ -55,6 +55,9 @@ importers:
       globals:
         specifier: ^15.11.0
         version: 15.15.0
+      ioredis:
+        specifier: ^5.3.2
+        version: 5.7.0
       leven:
         specifier: ^4.0.0
         version: 4.0.0
