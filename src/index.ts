@@ -5,6 +5,7 @@ import findRule from './utils/find-rule.js'
 import { Unauthorized, UnauthorizedField, MissingNotNullableError, PermissionsOutdated } from './utils/errors.js'
 import fastifyLogto, { LogtoFastifyConfig } from '@albirex/fastify-logto';
 import fastifyRedis from '@fastify/redis';
+import { Redis } from 'ioredis';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { FastifyUserPluginOptions } from 'fastify-user';
 import type { Entity, PlatformaticContext } from '@platformatic/sql-mapper'
@@ -38,6 +39,8 @@ export type RedisConfig = {
     password?: string;
     username?: string;
     db?: number;
+    connectTimeout?: number;
+    retryStrategy?: (times: number) => number | void | null;
 };
 
 export type PlatformaticLogToRoleBasedAuthOptions = {
@@ -77,14 +80,38 @@ export const platformaticLogto: FastifyPluginAsync<PlatformaticLogtoAuthOptions>
 
     // Register Redis if configured
     if (opts.redis) {
-        await app.register(fastifyRedis, {
+        // We connect ioredis ourselves (lazyConnect) instead of letting @fastify/redis
+        // create+wait on the client: @fastify/redis only resolves its register() promise
+        // on the 'ready'/'end' events, but ioredis emits 'end' with no error argument when
+        // it gives up retrying, so registration always looks "successful" even when Redis
+        // never connected. ioredis's own connect() promise, on the other hand, rejects
+        // deterministically on the first 'close' event, which is what we want here.
+        const redisClient = new Redis({
             host: opts.redis.host || '127.0.0.1',
             port: opts.redis.port || 6379,
             password: opts.redis.password,
             username: opts.redis.username,
             db: opts.redis.db || 0,
+            connectTimeout: opts.redis.connectTimeout || 2000,
+            lazyConnect: true,
+            retryStrategy: opts.redis.retryStrategy || null, // don't keep retrying in the background after we give up
         });
-        app.log.info('Redis client registered for permissions version check');
+        // ioredis emits 'error' for every failed reconnect attempt; without a listener
+        // Node would otherwise be fine here (ioredis uses silentEmit), but we still want
+        // the errors logged rather than silently dropped.
+        redisClient.on('error', (err) => {
+            app.log.warn({ err }, 'Redis connection error');
+        });
+
+        try {
+            await redisClient.connect();
+            await app.register(fastifyRedis, { client: redisClient, closeClient: true });
+            app.log.info('Redis client registered for permissions version check');
+        } catch (error) {
+            app.log.error({ err: error }, 'Failed to register Redis client for permissions version check. WILL NOT CHECK!');
+            opts.enableTokenVersionCheck = false; // Disable token version check if Redis registration fails
+            redisClient.disconnect();
+        }
     }
 
     if (opts.roleBasedAuth || opts.fastifyLogTo) {
